@@ -9,8 +9,10 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
+import AddIcon from "@mui/icons-material/Add";
 
 import Sidebar from './Sidebar';
+import "./StudentDashboard.css";
 
 // Utility functions for localStorage persistence
 const NOTIFICATIONS_STORAGE_KEY = 'student_notifications';
@@ -238,7 +240,16 @@ function StudentDashboard() {
     if (showJoinModal && inputRef.current) {
       // small timeout to ensure modal is in DOM
       setTimeout(() => inputRef.current.focus(), 50);
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden';
+    } else {
+      // Restore body scroll when modal closes
+      document.body.style.overflow = 'unset';
     }
+    
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
   }, [showJoinModal]);
 
   useEffect(() => {
@@ -557,189 +568,192 @@ function StudentDashboard() {
   const readHasMore = readNotifications.length > NOTIFICATIONS_PER_PAGE;
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-[#E0EAFC] to-[#CFDEF3] transition-all duration-500 mt-10">
+    <div className="student-dashboard-container">
+      {/* Animated background blobs */}
+      <div className="student-dashboard-blob dashboard-blob-1"></div>
+      <div className="student-dashboard-blob dashboard-blob-2"></div>
+      <div className="student-dashboard-blob dashboard-blob-3"></div>
+
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-        {/* footer now inside Sidebar component */}
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      {/* Main Content Wrapper */}
+      <div className="dashboard-main-wrapper">
         <Header
           onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
           onLogout={handleLogout}
         />
 
-        <main className="flex-grow p-6 md:p-10 pt-28 md:pt-31 relative md:ml-0">
-          {/* Join Class + Notifications Buttons */}
-          <div className="absolute top-28 right-10 z-50 flex items-center gap-3">
-            {showNotificationsButton && (
-              <div className="relative">
-                <button
-                  onClick={() => {
-                    setIsNotifOpen(true);
-                  }}
-                  className="flex items-center justify-center w-12 h-12 rounded-full bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 shadow-md transition-all"
-                  title="Notifications"
-                >
-                  <NotificationsIcon />
-                </button>
-
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-semibold leading-none text-white bg-red-500 rounded-full">{unreadCount}</span>
-                )}
+        <div className="dashboard-main">
+          {/* Header Section */}
+          <div className="dashboard-header">
+            <div className="dashboard-header-content">
+              <div className="dashboard-title-group">
+                <HomeIcon />
+                <div>
+                  <h1 className="dashboard-title">My Dashboard</h1>
+                  <p className="dashboard-subtitle">Manage your classes and coursework</p>
+                </div>
               </div>
-            )}
-
-            <button
-              onClick={() => setShowJoinModal(true)}
-              className="flex items-center gap-2 border border-gray-400 text-gray-800 hover:bg-gray-100 px-4 py-2 rounded-full font-medium transition-all bg-white shadow-md"
-            >
-              <span className="text-lg">＋</span> Join Class
-            </button>
+              <div className="flex items-center gap-3">
+                {showNotificationsButton && (
+                  <div className="relative">
+                    <button
+                      onClick={() => setIsNotifOpen(true)}
+                      className="flex items-center justify-center w-12 h-12 rounded-full bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 shadow-md transition-all"
+                      title="Notifications"
+                    >
+                      <NotificationsIcon />
+                    </button>
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-semibold text-white bg-red-500 rounded-full">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </div>
+                )}
+                <button
+                  onClick={() => setShowJoinModal(true)}
+                  className="join-class-button"
+                >
+                  <AddIcon style={{ width: 20, height: 20 }} />
+                  Join Class
+                </button>
+              </div>
+            </div>
           </div>
 
-
-          {/* Welcome Message */}
-          <h1 className="text-3xl font-bold text-gray-800 mb-10 text-left drop-shadow-sm">
-            Welcome, Student!
-          </h1>
-
-          {/* My Classes Section */}
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-              My Classes
-            </h2>
+          {/* Main Content Section */}
+          <div className="dashboard-section">
+            <div className="dashboard-section-header">
+              <h2 className="dashboard-section-title">
+                My Classes
+              </h2>
+            </div>
 
             {loading ? (
-              <p className="text-center text-gray-600">Loading classes...</p>
+              <div className="dashboard-loading">
+                <div className="dashboard-spinner"></div>
+              </div>
             ) : classes.length === 0 ? (
-              <div className="bg-white/70 backdrop-blur-md p-8 rounded-2xl shadow-sm flex justify-center items-center">
-                <p className="text-gray-600 text-lg font-medium">
-                  No active classes.
-                </p>
+              <div className="dashboard-grid">
+                <div className="dashboard-empty-state">
+                  <div className="dashboard-empty-icon">📚</div>
+                  <h3 className="dashboard-empty-title">No Classes Yet</h3>
+                  <p className="dashboard-empty-message">
+                    Join a class or wait for your instructor to add you to a class.
+                  </p>
+                </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-                {classes.map((cls, index) => {
+              <div className="dashboard-grid">
+                {classes.map((cls) => {
                   const classTitle = cls.title || "Untitled Class";
-                  const initials = classTitle.slice(0, 2).charAt(0).toUpperCase() + classTitle.slice(1, 2).toLowerCase();
-
-                  // Matching gradient palette with instructor dashboard - assigned by class ID hash
-                  const colors = [
-                    "linear-gradient(135deg, #E6F3FF 0%, #DCEFFF 100%)",
-                    "linear-gradient(135deg, #FFF7ED 0%, #FFF1D6 100%)",
-                    "linear-gradient(135deg, #EAF8FF 0%, #E6FFF4 100%)",
-                    "linear-gradient(135deg, #F6EEFF 0%, #F0E8FF 100%)",
-                    "linear-gradient(135deg, #E8FFF7 0%, #E6FFF0 100%)",
-                    "linear-gradient(135deg, #FFF6F9 0%, #FFF2F0 100%)",
-                  ];
-                  // Use class ID to consistently assign color (same class = same color)
+                  const classCode = cls.class_code || "N/A";
                   const classId = cls.subject_id || cls.class_id || cls.id;
-                  const colorIndex = Array.from(classId.toString()).reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
-                  const gradientColor = colors[colorIndex];
 
                   return (
                     <div
-                      key={cls.subject_id || cls.class_id || cls.id}
+                      key={classId}
+                      className="dashboard-card"
                       onClick={() => navigate('/student/subclass', { state: { classData: cls } })}
-                      className="relative bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl shadow-md p-6 flex flex-col hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer"
                     >
-                      <span className="absolute top-4 right-4 text-xs bg-green-100 text-green-700 px-2 py-1 rounded-md">
-                        Active
-                      </span>
-
-                      {/* Gradient Box with Initials */}
-                      <div className="flex justify-center mb-4">
-                        <div
-                          style={{
-                            background: gradientColor,
-                          }}
-                          className="h-16 w-16 rounded-xl flex items-center justify-center shadow-md"
-                        >
-                          <span className="text-2xl font-bold text-blue-700">
-                            {initials}
-                          </span>
-                        </div>
+                      {/* Card Header */}
+                      <div className="dashboard-card-header">
+                        <span className="dashboard-card-subject">Active</span>
+                        <span className="dashboard-card-code">{classCode}</span>
                       </div>
 
-                      <div className="flex flex-col items-center text-center mb-3">
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          {classTitle}
-                        </h3>
-                      </div>
+                      {/* Card Title */}
+                      <h3 className="dashboard-card-title">{classTitle}</h3>
 
-                      <p className="text-sm text-gray-600 mb-4 line-clamp-2 text-center">
+                      {/* Card Description */}
+                      <p className="text-sm text-gray-600 mb-4 line-clamp-2">
                         {cls.description || "No description available."}
                       </p>
 
+                      {/* Card Instructor */}
                       {cls.instructor_name && (
-                        <p className="text-xs text-gray-500">
-                          Instructor: <span className="font-medium">{cls.instructor_name}</span>
-                        </p>
-                      )}
-                      {/* Burger menu (lower-right) */}
-                      <button
-                        data-menu-ignore
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const id = cls.subject_id || cls.class_id || cls.id;
-                          toggleMenu(id);
-                        }}
-                        className="absolute bottom-4 right-4 p-2 rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 shadow"
-                        title="Options"
-                      >
-                        <MenuIcon fontSize="small" />
-                      </button>
-
-                      {menuOpenFor === (cls.subject_id || cls.class_id || cls.id) && (
-                        <div
-                          data-menu-ignore
-                          onClick={(e) => e.stopPropagation()}
-                          className="absolute bottom-14 right-4 bg-white border border-gray-200 rounded-md shadow-md z-50"
-                        >
-                          <button
-                            onClick={() => handleUnenroll(cls)}
-                            className="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
-                          >
-                            Unenroll
-                          </button>
+                        <div className="dashboard-card-instructor">
+                          <span>👨‍🏫</span>
+                          <span className="font-medium">{cls.instructor_name}</span>
                         </div>
                       )}
+
+                      {/* Card Actions */}
+                      <div className="dashboard-card-actions">
+                        <button
+                          className="dashboard-btn dashboard-btn-primary"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate('/student/subclass', { state: { classData: cls } });
+                          }}
+                        >
+                          View Class
+                        </button>
+                        <div className="relative">
+                          <button
+                            data-menu-ignore
+                            className="dashboard-btn dashboard-btn-menu"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleMenu(classId);
+                            }}
+                            title="Options"
+                          >
+                            <MenuIcon fontSize="small" />
+                          </button>
+                          {menuOpenFor === classId && (
+                            <div
+                              data-menu-ignore
+                              className="dashboard-card-menu"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleUnenroll(cls);
+                                }}
+                                className="danger"
+                              >
+                                Unenroll
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   );
                 })}
               </div>
             )}
-          </section>
-        </main>
+          </div>
+        </div>
       </div>
 
       {/* Join Class Modal */}
       {showJoinModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
-          <div className="bg-white rounded-2xl shadow-lg p-8 w-[90%] max-w-md">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 text-center">
-              Join a Class
-            </h2>
+        <div className="dashboard-modal">
+          <div className="dashboard-modal-content">
+            <h2 className="dashboard-modal-title">Join a Class</h2>
             <input
               type="text"
               value={joinCode}
               onChange={(e) => setJoinCode(e.target.value)}
               placeholder="Enter class code"
-              className="w-full border border-gray-300 rounded-lg p-3 mb-4 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="dashboard-modal-input"
               ref={inputRef}
             />
-            <div className="flex justify-end gap-3">
+            <div className="dashboard-modal-buttons">
               <button
                 onClick={() => setShowJoinModal(false)}
-                className="px-4 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 transition-all"
+                className="dashboard-modal-btn dashboard-modal-btn-cancel"
               >
                 Cancel
               </button>
               <button
                 onClick={handleJoinClass}
-                className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-all"
+                className="dashboard-modal-btn dashboard-modal-btn-confirm"
               >
                 Join
               </button>

@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Header from "../../web_components/Header";
 import Sidebar from "./Sidebar";
+import "./InstructorDashboard.css";
 
 function DashboardPage() {
   const [message, setMessage] = useState("");
@@ -299,19 +300,26 @@ function DashboardPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#E0EAFC] to-[#CFDEF3] transition-all duration-500 select-none">
-      <Header
-        onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-        onLogout={handleLogout}
-        showMenu={false}
-      />
-      
-      <div className="flex flex-1">
+    <div className="instructor-dashboard-container">
+      {/* Animated background blobs */}
+      <div className="instructor-dashboard-blob instructor-blob-1"></div>
+      <div className="instructor-dashboard-blob instructor-blob-2"></div>
+      <div className="instructor-dashboard-blob instructor-blob-3"></div>
+
+      <div className="dashboard-main-wrapper">
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+        {/* Main Content Column */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
+          <Header
+            onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+            onLogout={handleLogout}
+            showMenu={false}
+          />
 
         {/* ✅ Main Content */}
         <main 
-          className="flex-grow flex flex-col p-10 mt-22"
+          className="instructor-dashboard-main"
           onClick={() => setOpenMenuId(null)}
         >
           {/* Greeting */}
@@ -517,7 +525,6 @@ function DashboardPage() {
               );
             })}
           </div>
-        </main>
 
         
 
@@ -683,6 +690,8 @@ function DashboardPage() {
           </div>
         </div>
       )}
+        </main>
+        </div>
       </div>
     </div>
   );

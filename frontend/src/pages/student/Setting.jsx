@@ -26,21 +26,32 @@ function Setting() {
       })
       .then((res) => {
         setMessage(res.data.message);
-        // Load server avatar into profileSettings
-        if (res.data?.user?.avatar) {
-          const fullUrl = res.data.user.avatar.startsWith('http') ? res.data.user.avatar : `${FILE_BASE_URL}${res.data.user.avatar}`;
-          setProfileSettings((prev) => ({ ...prev, avatar: fullUrl }));
-          try { localStorage.setItem('student_profile', JSON.stringify({ ...prev, avatar: fullUrl })); } catch (e) {}
-        }
-        // Also load username and email if not already set
-        if (res.data?.user?.username) {
-          setProfileSettings((prev) => ({
-            ...prev,
-            name: res.data.user.username,
-            email: res.data.user.email || prev.email,
-            avatar: res.data.user.avatar ? (res.data.user.avatar.startsWith('http') ? res.data.user.avatar : `${FILE_BASE_URL}${res.data.user.avatar}`) : prev.avatar
-          }));
-          try { const prof = { ...JSON.parse(localStorage.getItem('student_profile') || '{}'), name: res.data.user.username, email: res.data.user.email || '' }; localStorage.setItem('student_profile', JSON.stringify(prof)); } catch (e) {}
+        
+        // Populate profile settings from backend response
+        if (res.data?.user) {
+          const userData = res.data.user;
+          const avatarUrl = userData.avatar 
+            ? (userData.avatar.startsWith('http') ? userData.avatar : `${FILE_BASE_URL}${userData.avatar}`)
+            : '';
+          
+          setProfileSettings({
+            name: userData.username || 'Your name',
+            email: userData.email || '',
+            avatar: avatarUrl
+          });
+          
+          // Update localStorage for consistency
+          try {
+            localStorage.setItem('username', userData.username || 'Student');
+            localStorage.setItem('email', userData.email || '');
+            localStorage.setItem('student_profile', JSON.stringify({
+              name: userData.username || 'Your name',
+              email: userData.email || '',
+              avatar: avatarUrl
+            }));
+          } catch (e) {
+            console.warn('Failed to update localStorage', e);
+          }
         }
       })
       .catch((err) => {

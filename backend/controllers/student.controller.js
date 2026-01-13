@@ -190,7 +190,7 @@ const path = require('path');
 // GET /student/setting - return user basic info and current avatar
 exports.getSetting = (req, res) => {
   const userId = req.userId;
-  const sql = `SELECT u.user_id, u.username, u.email,
+  const sql = `SELECT u.user_id, u.username, u.email, u.profile_picture,
     ua.file_path AS avatar_path, ua.stored_name, ua.original_name, ua.mime_type, ua.uploaded_at
     FROM users u
     LEFT JOIN user_avatars ua ON ua.user_id = u.user_id AND ua.is_current = 1
@@ -204,13 +204,16 @@ exports.getSetting = (req, res) => {
     const row = rows && rows[0] ? rows[0] : null;
     if (!row) return res.status(404).json({ message: 'User not found' });
 
+    // Prefer user_avatars table, fallback to users.profile_picture
+    const avatarPath = row.avatar_path || row.profile_picture || null;
+
     return res.json({
       message: 'Student settings',
       user: {
         user_id: row.user_id,
         username: row.username,
         email: row.email,
-        avatar: row.avatar_path || null,
+        avatar: avatarPath,
       },
     });
   });

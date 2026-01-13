@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import virtulab from "../../assets/Virtulab.svg";
+import "./Register.css";
 
 function RegisterPage() {
   const navigate = useNavigate();
@@ -17,6 +18,9 @@ function RegisterPage() {
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // handle input change
   const handleChange = (e) => {
@@ -28,16 +32,19 @@ function RegisterPage() {
     e.preventDefault();
     setError("");
     setSuccess("");
+    setLoading(true);
 
     const { fullname, email, password, confirmPassword, role } = formData;
 
     if (!fullname || !email || !password || !confirmPassword) {
       setError("All fields are required.");
+      setLoading(false);
       return;
     }
 
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
+      setLoading(false);
       return;
     }
 
@@ -57,122 +64,242 @@ function RegisterPage() {
       setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
       setError(err.response?.data?.message || "Registration failed.");
+    } finally {
+      setLoading(false);
     }
   };
 
 
   return (
-    <div className="relative flex flex-col min-h-screen bg-gradient-to-br from-[#eaf6ff] via-[#d6eeff] to-white">
-      {/* decorative gradient circle */}
-      <div className="pointer-events-none absolute -top-36 -left-36 w-72 h-72 rounded-full bg-gradient-to-br from-[#bfe9ff] to-[#8fd9ff] opacity-40 blur-3xl" />
+    <div className="register-container">
+      {/* Animated background elements */}
+      <div className="register-bg-blob blob-1" />
+      <div className="register-bg-blob blob-2" />
+      <div className="register-bg-blob blob-3" />
 
-      <header className="flex items-center gap-3 px-6 py-4 md:px-12 md:py-6">
-        <img src={virtulab} alt="VirtuLab" className="w-12 md:w-14" />
-        <h1 className="text-xl md:text-2xl font-extrabold text-sky-700">VirtuLab</h1>
+      {/* Header */}
+      <header className="register-header">
+        <div className="header-content">
+          <img src={virtulab} alt="VirtuLab" className="header-logo" />
+          <div>
+            <h1 className="header-title">VirtuLab</h1>
+            <p className="header-subtitle">Virtual Laboratory Platform</p>
+          </div>
+        </div>
       </header>
 
-      {/* Register Form Section */}
-      <div className="flex flex-1 items-center justify-center px-4 md:px-8">
-        <div className="relative w-full max-w-lg bg-white/95 p-8 md:p-12 rounded-3xl shadow-2xl mt-6">
-          <h2 className="text-2xl md:text-3xl font-extrabold text-center mb-4 text-slate-800">
-            Create your account
-          </h2>
+      {/* Register Form Container */}
+      <div className="register-main">
+        <div className="register-card">
+          {/* Card Header */}
+          <div className="register-card-header">
+            <h2>Create Your Account</h2>
+            <p>Join VirtuLab and start your learning journey</p>
+          </div>
 
-          <form onSubmit={handleSubmit}>
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="register-form">
             {/* Full Name */}
-            <label htmlFor="fullname" className="block text-sm font-medium text-slate-600 mb-2">
-              Full Name
-            </label>
-            <input
-              type="text"
-              id="fullname"
-              name="fullname"
-              value={formData.fullname}
-              onChange={handleChange}
-              placeholder="Enter your full name"
-              className="w-full p-3 border border-gray-200 rounded-xl mb-6 focus:outline-none focus:ring-4 focus:ring-sky-200 text-gray-800 placeholder-gray-400 text-lg"
-            />
+            <div className="form-group">
+              <label htmlFor="fullname">Full Name</label>
+              <div className="input-wrapper">
+                <svg className="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <input
+                  type="text"
+                  id="fullname"
+                  name="fullname"
+                  value={formData.fullname}
+                  onChange={handleChange}
+                  placeholder="Enter your full name"
+                  className="form-input"
+                />
+              </div>
+            </div>
 
             {/* Email */}
-            <label htmlFor="email" className="block text-sm font-medium text-slate-600 mb-2">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter your email"
-              className="w-full p-3 border border-gray-200 rounded-xl mb-6 focus:outline-none focus:ring-4 focus:ring-sky-200 text-gray-800 placeholder-gray-400 text-lg"
-            />
+            <div className="form-group">
+              <label htmlFor="email">Email Address</label>
+              <div className="input-wrapper">
+                <svg className="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="you@example.com"
+                  className="form-input"
+                />
+              </div>
+            </div>
 
             {/* Password */}
-            <label htmlFor="password" className="block text-sm font-medium text-slate-600 mb-2">
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Create a password"
-              className="w-full p-3 border border-gray-200 rounded-xl mb-6 focus:outline-none focus:ring-4 focus:ring-sky-200 text-gray-800 placeholder-gray-400 text-lg"
-            />
+            <div className="form-group">
+              <label htmlFor="password">Password</label>
+              <div className="input-wrapper">
+                <svg className="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0110 0v4"/>
+                </svg>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Create a password"
+                  className="form-input"
+                />
+                <button
+                  type="button"
+                  className="toggle-password"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex="-1"
+                >
+                  {showPassword ? (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.41a3 3 0 10-4.24-4.24"/>
+                      <line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </div>
 
             {/* Confirm Password */}
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-600 mb-2">
-              Confirm Password
-            </label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              placeholder="Re-enter your password"
-              className="w-full p-3 border border-gray-200 rounded-xl mb-6 focus:outline-none focus:ring-4 focus:ring-sky-200 text-gray-800 placeholder-gray-400 text-lg"
-            />
+            <div className="form-group">
+              <label htmlFor="confirmPassword">Confirm Password</label>
+              <div className="input-wrapper">
+                <svg className="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0110 0v4"/>
+                </svg>
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Re-enter your password"
+                  className="form-input"
+                />
+                <button
+                  type="button"
+                  className="toggle-password"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  tabIndex="-1"
+                >
+                  {showConfirmPassword ? (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.41a3 3 0 10-4.24-4.24"/>
+                      <line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </div>
 
-            {/* 🧩 Role Selector (Admin excluded) */}
-            <label htmlFor="role" className="block text-sm font-medium text-slate-600 mb-2">
-              Role
-            </label>
-            <select
-              id="role"
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              className="w-full p-3 border border-gray-200 rounded-xl mb-6 focus:outline-none focus:ring-4 focus:ring-sky-200 text-gray-800 text-lg"
-            >
-              <option value="student">Student</option>
-              <option value="instructor">Instructor</option>
-            </select>
+            {/* Role Selector */}
+            <div className="form-group">
+              <label htmlFor="role">I am a</label>
+              <div className="input-wrapper">
+                <svg className="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+                </svg>
+                <select
+                  id="role"
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange}
+                  className="form-select"
+                >
+                  <option value="student">🎓 Student</option>
+                  <option value="instructor">👨‍🏫 Instructor</option>
+                </select>
+              </div>
+            </div>
 
 
-            {/* Feedback Messages */}
+            {/* Error Message */}
             {error && (
-              <p className="text-red-600 text-sm mb-3 text-center">{error}</p>
-            )}
-            {success && (
-              <p className="text-green-600 text-sm mb-3 text-center">{success}</p>
+              <div className="error-message">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M12 6v6m0 4v.01" stroke="white" strokeWidth="2" fill="none"/>
+                </svg>
+                <span>{error}</span>
+              </div>
             )}
 
+            {/* Success Message */}
+            {success && (
+              <div className="success-message">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                  <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+                <span>{success}</span>
+              </div>
+            )}
+
+            {/* Register Button */}
             <button
               type="submit"
-              className="w-full text-white py-3 rounded-2xl hover:shadow-lg transition bg-gradient-to-r from-sky-500 to-indigo-500 text-lg font-semibold"
+              disabled={loading}
+              className="register-button"
             >
-              Create account
+              {loading ? (
+                <>
+                  <span className="button-spinner" />
+                  <span>Creating account...</span>
+                </>
+              ) : (
+                <>
+                  <span>Create Account</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                  </svg>
+                </>
+              )}
             </button>
           </form>
 
-          <p className="text-center text-sm text-gray-500 mt-4">
-            Already have an account?{" "}
-            <button onClick={() => navigate("/login")}>
-              <span className="font-bold text-sky-600 hover:underline cursor-pointer">Login</span>
-            </button>
-          </p>
+          {/* Divider */}
+          <div className="form-divider">
+            <span>Already have an account?</span>
+          </div>
+
+          {/* Login Link */}
+          <button
+            type="button"
+            onClick={() => navigate('/login')}
+            className="login-link"
+          >
+            Sign In to Your Account
+          </button>
+
+          {/* Footer */}
+          <div className="register-card-footer">
+            <p>By creating an account, you agree to our terms and conditions</p>
+          </div>
         </div>
       </div>
     </div>

@@ -10,9 +10,12 @@ function Sidebar({ isOpen, onClose }) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Mirrored behaviour from StudentDashboard for a consistent sidebar
+  // Get user data from localStorage
   const [username, setUsername] = useState(() => localStorage.getItem("username") || "Student");
   const [email, setEmail] = useState(() => localStorage.getItem("email") || "");
+  const [profileImage, setProfileImage] = useState(null);
+  const [loading, setLoading] = useState(true);
+  
   const initials = username
     .split(" ")
     .map((n) => n.charAt(0))
@@ -20,78 +23,89 @@ function Sidebar({ isOpen, onClose }) {
     .slice(0, 2)
     .toUpperCase();
 
-  const storageKey = `profileImage_${username}`;
-  const sanitizeImage = (val) => {
-    try {
-      if (!val) return null;
-      const s = String(val);
-      if (s.startsWith('blob:')) return null;
-      return s;
-    } catch (e) { return null; }
-  };
+  // Fetch user profile data from backend
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          setLoading(false);
+          return;
+        }
 
-  const [profileImage, setProfileImage] = useState(() => sanitizeImage(localStorage.getItem(storageKey)) || null);
+        const response = await fetch('http://localhost:5000/api/student/setting', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
 
-  // Listen for profile changes performed elsewhere in-page (Setting.jsx) and update name/email/avatar
+        if (response.ok) {
+          const data = await response.json();
+          if (data.user) {
+            if (data.user.username) {
+              setUsername(data.user.username);
+              localStorage.setItem('username', data.user.username);
+            }
+            if (data.user.email) {
+              setEmail(data.user.email);
+              localStorage.setItem('email', data.user.email);
+            }
+            if (data.user.avatar) {
+              const imageUrl = data.user.avatar.startsWith('http') 
+                ? data.user.avatar 
+                : `http://localhost:5000${data.user.avatar}`;
+              setProfileImage(imageUrl);
+            } else {
+              setProfileImage(null);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
+
+  // Listen for profile changes from Settings page
   useEffect(() => {
     const handler = (evt) => {
       try {
         const payload = evt?.detail || null;
         if (!payload) return;
-        const newName = payload.name || localStorage.getItem('username') || 'Student';
-        const newEmail = payload.email || localStorage.getItem('email') || '';
-        setUsername(newName);
-        setEmail(newEmail);
-        const newKey = `profileImage_${newName}`;
-        // If payload includes avatar preview (object URL), use it for immediate preview
-        const payloadAvatar = payload.avatar;
-        if (payloadAvatar && !String(payloadAvatar).startsWith('blob:')) {
-          setProfileImage(sanitizeImage(payloadAvatar) || sanitizeImage(localStorage.getItem(newKey)) || null);
-        } else if (payloadAvatar && String(payloadAvatar).startsWith('blob:')) {
-          // blob preview present in payload — show it temporarily (don't persist)
-          try { setProfileImage(payloadAvatar); } catch (e) { setProfileImage(sanitizeImage(localStorage.getItem(newKey)) || null); }
-        } else {
-          setProfileImage(sanitizeImage(localStorage.getItem(newKey)) || null);
+        
+        if (payload.name) {
+          setUsername(payload.name);
+          localStorage.setItem('username', payload.name);
+        }
+        if (payload.email) {
+          setEmail(payload.email);
+          localStorage.setItem('email', payload.email);
+        }
+        if (payload.avatar) {
+          // Handle both blob URLs (temporary preview) and server URLs
+          if (String(payload.avatar).startsWith('blob:')) {
+            setProfileImage(payload.avatar);
+          } else if (String(payload.avatar).startsWith('http')) {
+            setProfileImage(payload.avatar);
+          } else if (payload.avatar.startsWith('/')) {
+            setProfileImage(`http://localhost:5000${payload.avatar}`);
+          }
+        } else if (payload.avatarRemoved) {
+          setProfileImage(null);
         }
       } catch (err) {
-        // ignore
+        console.error('Error handling profile change:', err);
       }
     };
 
     window.addEventListener('student_profile_changed', handler);
     return () => window.removeEventListener('student_profile_changed', handler);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  // Profile editing removed — username/avatar are display-only
-
-  // On mount (or when username changes), try to fetch a server-side avatar
-  useEffect(() => {
-    let mounted = true;
-    const token = localStorage.getItem('token');
-    // If we already have an http(s) url in localStorage, prefer it
-    const current = localStorage.getItem(storageKey);
-    if (!token) return;
-    if (current && typeof current === 'string' && current.startsWith('http')) return;
-    (async () => {
-      try {
-        const r = await fetch('http://localhost:5000/api/user/me/avatar', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!r.ok) return;
-        const d = await r.json();
-        const fp = d?.avatar?.file_path;
-        if (!fp) return;
-        const abs = fp.startsWith('http') ? fp : `http://localhost:5000${fp}`;
-        if (mounted) {
-          try { localStorage.setItem(storageKey, abs); } catch {}
-          setProfileImage(abs);
-        }
-      } catch (err) {
-        // ignore failures
-      }
-    })();
-    return () => { mounted = false; };
-  }, [username]);
 
   const links = [
     { name: "Home", 
@@ -150,7 +164,10 @@ function Sidebar({ isOpen, onClose }) {
                         src={profileImage}
                         alt="profile"
                         className="w-full h-full object-cover"
-                        onError={(e) => { try { localStorage.removeItem(storageKey); } catch (er) {}; e.currentTarget.style.display = 'none'; }}
+                        onError={(e) => { 
+                          setProfileImage(null);
+                          e.currentTarget.style.display = 'none'; 
+                        }}
                       />
                     ) : (
                       <span className="text-lg">{initials}</span>

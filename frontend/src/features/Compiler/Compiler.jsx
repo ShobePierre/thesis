@@ -6,6 +6,7 @@ import Sidebar from "../../pages/student/Sidebar";
 import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
 import "xterm/css/xterm.css";
+import "./Compiler.css";
 
 function Compiler() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -287,65 +288,103 @@ function Compiler() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="compiler-container">
+      {/* Animated background blobs */}
+      <div className="compiler-bg-blob compiler-blob-1" />
+      <div className="compiler-bg-blob compiler-blob-2" />
+
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <div className="flex-1 flex flex-col bg-gray-100">
+      <div className="compiler-content">
         <Header onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
-        <div className="flex items-center justify-between p-4 bg-white border-b border-gray-300 shadow-sm sticky top-0 z-10 mt-25">
-          <div className="flex items-center gap-4">
+        <div className="compiler-toolbar">
+          <div className="toolbar-left">
             <select
               value={language}
               onChange={handleLanguageChange}
-              className="bg-white border border-gray-300 text-gray-700 rounded-lg px-3 py-2 text-sm cursor-pointer hover:border-blue-500 transition"
+              className="compiler-select"
+              title="Select programming language"
             >
-              <option value="python3">Python</option>
-              <option value="c">C</option>
-              <option value="cpp">C++</option>
-              <option value="java">Java</option>
+              <option value="python3">🐍 Python</option>
+              <option value="c">📘 C</option>
+              <option value="cpp">⚡ C++</option>
+              <option value="java">☕ Java</option>
             </select>
 
             <select
               value={theme}
               onChange={(e) => setTheme(e.target.value)}
-              className="bg-white border border-gray-300 text-gray-700 rounded-lg px-3 py-2 text-sm cursor-pointer hover:border-blue-500 transition"
+              className="compiler-select"
+              title="Select editor theme"
             >
-              <option value="vs-dark">Dark</option>
-              <option value="light">Light</option>
+              <option value="vs-dark">🌙 Dark Theme</option>
+              <option value="light">☀️ Light Theme</option>
             </select>
           </div>
 
-          <div className="flex gap-3">
+          <div className="toolbar-right">
             <button
               onClick={runCode}
-              className="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition shadow-md font-medium"
+              className="compiler-btn btn-run"
+              title="Run code (Ctrl+Enter)"
             >
-              ▶ Run
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+              <span>Run</span>
             </button>
             <button
               onClick={clearTerminal}
-              className="bg-gray-600 text-white px-5 py-2 rounded-lg hover:bg-gray-700 transition shadow-md font-medium"
+              className="compiler-btn btn-clear"
+              title="Clear terminal output"
             >
-              🗑 Clear
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 6h18M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2m3 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6h14z"/>
+              </svg>
+              <span>Clear</span>
             </button>
             <button
               onClick={() => navigate(-1)}
-              className="bg-red-600 text-white px-5 py-2 rounded-lg hover:bg-red-700 transition shadow-md font-medium"
+              className="compiler-btn btn-close"
+              title="Close compiler"
             >
-              ✕ Close
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+              <span>Close</span>
             </button>
           </div>
         </div>
 
-        <div className="flex flex-1 overflow-hidden">
-          <div className="w-1/2 h-full border-r border-gray-300">
-            <Editor
-              height="100%"
-              language={language === "python3" ? "python" : language}
-              theme={theme}
-              value={code}
-              onChange={(val) => setCode(val || "")}
-              options={{
+        <div className="compiler-workspace">
+          <div className="editor-panel">
+            <div className="editor-header">
+              <div className="editor-title">
+                <svg className="editor-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <line x1="16" y1="13" x2="8" y2="13"/>
+                  <line x1="16" y1="17" x2="8" y2="17"/>
+                  <polyline points="10 9 9 9 8 9"/>
+                </svg>
+                <span>Code Editor</span>
+              </div>
+              <div className="status-badge status-idle">
+                <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor">
+                  <circle cx="4" cy="4" r="4"/>
+                </svg>
+                <span>Ready</span>
+              </div>
+            </div>
+            <div className="editor-content">
+              <Editor
+                height="100%"
+                language={language === "python3" ? "python" : language}
+                theme={theme}
+                value={code}
+                onChange={(val) => setCode(val || "")}
+                options={{
                 fontSize: 16,
                 minimap: { enabled: false },
                 automaticLayout: true,
@@ -385,11 +424,28 @@ function Compiler() {
                   cycle: true,
                 },
               }}
-            />
+              />
+            </div>
           </div>
 
-          <div className="w-1/2 h-full p-2 bg-black flex flex-col">
-            <div ref={terminalRef} className="flex-1 rounded bg-gray-900 p-2" />
+          <div className="terminal-panel">
+            <div className="terminal-header">
+              <div className="terminal-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="4 17 10 11 4 5"/>
+                  <line x1="12" y1="19" x2="20" y2="19"/>
+                </svg>
+                <span>Terminal Output</span>
+              </div>
+              <div className="terminal-dots">
+                <div className="terminal-dot dot-red"></div>
+                <div className="terminal-dot dot-yellow"></div>
+                <div className="terminal-dot dot-green"></div>
+              </div>
+            </div>
+            <div className="terminal-content">
+              <div ref={terminalRef} style={{ width: '100%', height: '100%' }} />
+            </div>
           </div>
         </div>
       </div>

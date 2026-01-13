@@ -18,78 +18,91 @@ function Sidebar({ isOpen, onClose }) {
     .slice(0, 2)
     .toUpperCase();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  // removed file input ref (no inline avatar editing in the sidebar)
-  const storageKey = `profileImage_${username}`;
-  const sanitizeImage = (val) => {
-    try {
-      if (!val) return null;
-      const s = String(val);
-      // blob: URLs are session-local and won't survive reloads — ignore them
-      if (s.startsWith('blob:')) return null;
-      return s;
-    } catch (e) {
-      return null;
-    }
-  };
+  const [profileImage, setProfileImage] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const [profileImage, setProfileImage] = useState(() => sanitizeImage(localStorage.getItem(storageKey)) || null);
+  // Fetch user profile data from backend
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          setLoading(false);
+          return;
+        }
 
-  // Listen for profile changes performed elsewhere in-page (Setting.jsx) and update name/email
+        const response = await fetch('http://localhost:5000/api/instructor/setting', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.user) {
+            if (data.user.username) {
+              setUsername(data.user.username);
+              localStorage.setItem('username', data.user.username);
+            }
+            if (data.user.email) {
+              setEmail(data.user.email);
+              localStorage.setItem('email', data.user.email);
+            }
+            if (data.user.avatar) {
+              const imageUrl = data.user.avatar.startsWith('http') 
+                ? data.user.avatar 
+                : `http://localhost:5000${data.user.avatar}`;
+              setProfileImage(imageUrl);
+            } else {
+              setProfileImage(null);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
+
+  // Listen for profile changes from Settings page
   useEffect(() => {
     const handler = (evt) => {
       try {
         const payload = evt?.detail || null;
         if (!payload) return;
-        const newName = payload.name || localStorage.getItem('username') || 'Instructor';
-        const newEmail = payload.email || localStorage.getItem('email') || '';
-        setUsername(newName);
-        setEmail(newEmail);
-        const newKey = `profileImage_${newName}`;
-        const payloadAvatar = payload.avatar;
-        if (payloadAvatar && !String(payloadAvatar).startsWith('blob:')) {
-          setProfileImage(sanitizeImage(payloadAvatar) || sanitizeImage(localStorage.getItem(newKey)) || null);
-        } else if (payloadAvatar && String(payloadAvatar).startsWith('blob:')) {
-          try { setProfileImage(payloadAvatar); } catch (e) { setProfileImage(sanitizeImage(localStorage.getItem(newKey)) || null); }
-        } else {
-          setProfileImage(sanitizeImage(localStorage.getItem(newKey)) || null);
+        
+        if (payload.name) {
+          setUsername(payload.name);
+          localStorage.setItem('username', payload.name);
+        }
+        if (payload.email) {
+          setEmail(payload.email);
+          localStorage.setItem('email', payload.email);
+        }
+        if (payload.avatar) {
+          // Handle both blob URLs (temporary preview) and server URLs
+          if (String(payload.avatar).startsWith('blob:')) {
+            setProfileImage(payload.avatar);
+          } else if (String(payload.avatar).startsWith('http')) {
+            setProfileImage(payload.avatar);
+          } else if (payload.avatar.startsWith('/')) {
+            setProfileImage(`http://localhost:5000${payload.avatar}`);
+          }
+        } else if (payload.avatarRemoved) {
+          setProfileImage(null);
         }
       } catch (err) {
-        // ignore
+        console.error('Error handling profile change:', err);
       }
     };
 
-    // Listen for both instructor and student profile updates
     window.addEventListener('instructor_profile_changed', handler);
-    window.addEventListener('student_profile_changed', handler);
-    return () => {
-      window.removeEventListener('instructor_profile_changed', handler);
-      window.removeEventListener('student_profile_changed', handler);
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // On mount, if no profile image in localStorage, try fetching from server for current user
-  useEffect(() => {
-    const tryLoad = async () => {
-      if (profileImage) return;
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-        const resp = await fetch('http://localhost:5000/api/user/me/avatar', { headers: { Authorization: `Bearer ${token}` } });
-        if (!resp.ok) return;
-        const data = await resp.json();
-        const url = data.avatar?.file_path || null;
-        if (url) {
-          const abs = url.startsWith('http') ? url : `http://localhost:5000${url}`;
-          try { localStorage.setItem(storageKey, abs); } catch {}
-            setProfileImage(sanitizeImage(abs));
-        }
-      } catch (err) {
-        // silent
-      }
-    };
-    tryLoad();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => window.removeEventListener('instructor_profile_changed', handler);
   }, []);
   const links = [
     { name: "Home", 
@@ -132,7 +145,7 @@ function Sidebar({ isOpen, onClose }) {
         }}
       >
         {/* Header Section */}
-        <div className="px-4 py-6 text-center border-b">
+        <div className="px-4 py-6 text-center border-b mt-10">
           <div className="flex items-center justify-center gap-2">
             <h2 className="text-2xl font-bold text-[#19A5EA]">{username}</h2>
           </div>
@@ -149,8 +162,7 @@ function Sidebar({ isOpen, onClose }) {
                   alt="profile"
                   className="w-full h-full object-cover"
                   onError={(e) => {
-                    try { localStorage.removeItem(storageKey); } catch (er) {}
-                    // hide broken image and allow initials to show
+                    setProfileImage(null);
                     e.currentTarget.style.display = 'none';
                   }}
                 />
@@ -226,7 +238,7 @@ function Sidebar({ isOpen, onClose }) {
                     alt="profile"
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      try { localStorage.removeItem(storageKey); } catch (er) {}
+                      setProfileImage(null);
                       e.currentTarget.style.display = 'none';
                     }}
                   />

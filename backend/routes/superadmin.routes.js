@@ -1,7 +1,36 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const path = require('path');
 const superAdminController = require('../controllers/superadmin.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
+
+// Configure multer for profile picture uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, '../uploads/avatars'));
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'avatar-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|gif/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+    
+    if (extname && mimetype) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!'));
+    }
+  }
+});
 
 // All routes require Super Admin role and authentication
 router.use(authMiddleware.verifyToken);
@@ -10,8 +39,8 @@ router.use(authMiddleware.isSuperAdmin);
 // ==================== USER MANAGEMENT ====================
 router.get('/users', authMiddleware.logAudit('user', 'view_all_users'), superAdminController.getAllUsers);
 router.get('/users/:userId', authMiddleware.logAudit('user', 'view_user'), superAdminController.getUserById);
-router.post('/users', authMiddleware.logAudit('user', 'create_user'), superAdminController.createUser);
-router.put('/users/:userId', authMiddleware.logAudit('user', 'update_user'), superAdminController.updateUser);
+router.post('/users', upload.single('profile_picture'), authMiddleware.logAudit('user', 'create_user'), superAdminController.createUser);
+router.put('/users/:userId', upload.single('profile_picture'), authMiddleware.logAudit('user', 'update_user'), superAdminController.updateUser);
 router.delete('/users/:userId', authMiddleware.logAudit('user', 'delete_user'), superAdminController.deleteUser);
 
 // ==================== SUBMISSIONS MANAGEMENT ====================

@@ -74,6 +74,7 @@ exports.getUserById = (req, res) => {
 
 exports.createUser = (req, res) => {
   const { username, email, password, role_id } = req.body;
+  const profilePicture = req.file ? `/uploads/avatars/${req.file.filename}` : null;
 
   // Validation
   if (!username || !email || !password || !role_id) {
@@ -97,17 +98,17 @@ exports.createUser = (req, res) => {
         return res.status(500).send({ message: 'Error hashing password' });
       }
 
-      const insertQuery = 'INSERT INTO users (username, email, password, role_id) VALUES (?, ?, ?, ?)';
-      db.query(insertQuery, [username, email, hash, role_id], (insertErr, insertResults) => {
+      const insertQuery = 'INSERT INTO users (username, email, password, role_id, profile_picture) VALUES (?, ?, ?, ?, ?)';
+      db.query(insertQuery, [username, email, hash, role_id, profilePicture], (insertErr, insertResults) => {
         if (insertErr) {
           console.error('Create user error:', insertErr);
           return res.status(500).send({ message: 'Error creating user' });
         }
 
         // Log audit
-        req.auditData.entity_type = 'user';
-        req.auditData.entity_id = insertResults.insertId;
-        req.auditData.action = 'create_user';
+        if (req.auditData) {
+          req.auditData.entity_id = insertResults.insertId;
+        }
 
         res.status(201).send({
           message: 'User created successfully',
@@ -120,25 +121,64 @@ exports.createUser = (req, res) => {
 
 exports.updateUser = (req, res) => {
   const { userId } = req.params;
-  const { username, email, role_id } = req.body;
+  const { username, email, role_id, password } = req.body;
+  const profilePicture = req.file ? `/uploads/avatars/${req.file.filename}` : null;
+
+  console.log('Update user request:', { userId, username, email, role_id, hasPassword: !!password, hasFile: !!req.file });
 
   if (!username || !email || !role_id) {
     return res.status(400).send({ message: 'All fields are required' });
   }
 
-  const updateQuery = 'UPDATE users SET username = ?, email = ?, role_id = ? WHERE user_id = ?';
-  db.query(updateQuery, [username, email, role_id, userId], (err, results) => {
-    if (err) {
-      console.error('Update user error:', err);
-      return res.status(500).send({ message: 'Error updating user' });
-    }
+  // Build dynamic update query
+  let updateFields = ['username = ?', 'email = ?', 'role_id = ?'];
+  let updateValues = [username, email, parseInt(role_id)];
 
-    req.auditData.entity_type = 'user';
-    req.auditData.entity_id = parseInt(userId);
-    req.auditData.action = 'update_user';
+  // Add profile picture if provided
+  if (profilePicture) {
+    updateFields.push('profile_picture = ?');
+    updateValues.push(profilePicture);
+  }
 
-    res.send({ message: 'User updated successfully' });
-  });
+  const performUpdate = (additionalFields = [], additionalValues = []) => {
+    const allFields = [...updateFields, ...additionalFields];
+    const allValues = [...updateValues, ...additionalValues, userId];
+    
+    const updateQuery = `UPDATE users SET ${allFields.join(', ')} WHERE user_id = ?`;
+    console.log('Executing query:', updateQuery);
+    console.log('With values:', allValues);
+    
+    db.query(updateQuery, allValues, (err, results) => {
+      if (err) {
+        console.error('Update user error:', err);
+        return res.status(500).send({ message: 'Error updating user', error: err.message });
+      }
+
+      if (results.affectedRows === 0) {
+        return res.status(404).send({ message: 'User not found' });
+      }
+
+      // Update audit data entity_id
+      if (req.auditData) {
+        req.auditData.entity_id = parseInt(userId);
+      }
+
+      res.send({ message: 'User updated successfully' });
+    });
+  };
+
+  // Add password if provided
+  if (password && password.trim() !== '') {
+    bcrypt.hash(password, 10, (hashErr, hash) => {
+      if (hashErr) {
+        console.error('Password hash error:', hashErr);
+        return res.status(500).send({ message: 'Error hashing password' });
+      }
+      performUpdate(['password = ?'], [hash]);
+    });
+  } else {
+    performUpdate();
+  }
 };
 
 exports.deleteUser = (req, res) => {
@@ -160,9 +200,9 @@ exports.deleteUser = (req, res) => {
       return res.status(404).send({ message: 'User not found' });
     }
 
-    req.auditData.entity_type = 'user';
-    req.auditData.entity_id = parseInt(userId);
-    req.auditData.action = 'delete_user';
+    if (req.auditData) {
+      req.auditData.entity_id = parseInt(userId);
+    }
 
     res.send({ message: 'User deleted successfully' });
   });
@@ -299,20 +339,28 @@ exports.exportData = (req, res) => {
 
 exports.getAuditLogs = (req, res) => {
   const { user_id, action, limit = 20, offset = 0 } = req.query;
-  let query = 'SELECT * FROM audit_logs WHERE 1=1';
+  let query = `
+    SELECT 
+      al.log_id, al.user_id, al.action, al.entity_type, al.entity_id, 
+      al.ip_address, al.user_agent, al.created_at,
+      u.username, u.profile_picture
+    FROM audit_logs al
+    LEFT JOIN users u ON al.user_id = u.user_id
+    WHERE 1=1
+  `;
   const params = [];
 
   if (user_id) {
-    query += ' AND user_id = ?';
+    query += ' AND al.user_id = ?';
     params.push(user_id);
   }
 
   if (action) {
-    query += ' AND action LIKE ?';
+    query += ' AND al.action LIKE ?';
     params.push(`%${action}%`);
   }
 
-  query += ` ORDER BY created_at DESC LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`;
+  query += ` ORDER BY al.created_at DESC LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`;
 
   db.query(query, params, (err, results) => {
     if (err) {

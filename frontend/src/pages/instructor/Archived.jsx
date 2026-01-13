@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import DeleteIcon from "@mui/icons-material/Delete";
+import ArchiveIcon from "@mui/icons-material/Archive";
 import Header from "../../web_components/Header";
 import Sidebar from "./Sidebar";
+import "./Archived.css";
 
 function Archived_Instructor() {
   const [archived, setArchived] = useState([]);
@@ -70,66 +74,84 @@ function Archived_Instructor() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#cfe3fa] via-[#e6f0ff] to-white">
-      <Header
-        onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-        onLogout={handleLogout}
-      />
+    <div className="archived-container">
+      {/* Animated background blobs */}
+      <div className="archived-bg-blob archived-blob-1"></div>
+      <div className="archived-bg-blob archived-blob-2"></div>
+      <div className="archived-bg-blob archived-blob-3"></div>
 
-      <div className="flex flex-1">
+      <div className="dashboard-main-wrapper">
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-        <main className="flex-grow p-6 md:p-20">
-          <h1 className="text-3xl font-bold text-gray-800 mb-10 text-center drop-shadow-sm">
+        {/* Main Content */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
+          <Header
+            onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+            onLogout={handleLogout}
+          />
+
+          <main className="archived-main">
+          <div className="archived-header">
+            <h1 className="flex items-center justify-center gap-3 mb-2">
+              <ArchiveIcon sx={{ fontSize: "2.5rem" }} />
               Archived Classes
-          </h1>
+            </h1>
+            <p>Restore or permanently delete archived classes</p>
+          </div>
 
           {loading ? (
-            <p className="text-center text-gray-600">Loading archived classes...</p>
+            <div className="archived-loading">
+              <div className="archived-loading-spinner"></div>
+              <p>Loading archived classes...</p>
+            </div>
           ) : archived.length === 0 ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="bg-white/60 backdrop-blur-md px-8 py-6 rounded-2xl shadow-sm">
-                <p className="text-gray-700 text-lg">No archived classes found.</p>
+            <div className="archived-empty-container">
+              <div className="archived-empty-card">
+                <div className="archived-empty-icon">📦</div>
+                <h2 className="archived-empty-title">No Archived Classes</h2>
+                <p className="archived-empty-text">
+                  You haven't archived any classes yet. Archive classes when you're done with them.
+                </p>
               </div>
             </div>
           ) : (
-            <div className="grid gap-6" style={{ gridTemplateColumns: "repeat(5, 1fr)" }}>
+            <div className="archived-grid">
               {archived.map((subj) => (
-                <div
-                  key={subj.subject_id}
-                  className="relative bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl shadow-md p-6 flex flex-col hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-                >
-                  
-                  <div className="flex justify-between items-center mb-3">
-                    <h3 className="text-lg font-semibold text-gray-900">
+                <div key={subj.subject_id} className="archived-card">
+                  <div className="archived-card-header">
+                    <div className="archived-card-title">
                       {subj.title || "Untitled Class"}
-                    </h3>
-                    <span className="text-xs font-medium bg-gray-200 text-gray-700 px-2 py-1 rounded-md">
+                    </div>
+                    <span className="archived-card-badge">
                       Archived
                     </span>
                   </div>
 
-                  <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                    {subj.description || "No description available."}
-                  </p>
-
-                  {subj.class_code && (
-                    <p className="text-xs text-gray-500 mb-4">
-                      Code: <span className="font-medium">{subj.class_code}</span>
+                  <div className="archived-card-body">
+                    <p className="archived-card-description">
+                      {subj.description || "No description available."}
                     </p>
-                  )}
 
-                  <div className="mt-auto flex items-center justify-between">
-                    <div>
+                    {subj.class_code && (
+                      <div className="archived-card-code">
+                        <div className="archived-card-code-label">Class Code</div>
+                        <div className="archived-card-code-value">{subj.class_code}</div>
+                      </div>
+                    )}
+
+                    <div className="archived-button-group">
                       <button
-                        onClick={(e) => { e.stopPropagation(); handleRestore(subj.subject_id); }}
-                        className="px-4 py-2 text-sm font-semibold text-white bg-emerald-600 rounded-md hover:bg-emerald-700 transition-colors"
+                        onClick={(e) => { 
+                          e.stopPropagation(); 
+                          handleRestore(subj.subject_id); 
+                        }}
+                        className="archived-btn archived-btn-restore"
+                        title="Restore this class to active classes"
                       >
-                        Unarchive
+                        <RestartAltIcon sx={{ fontSize: "1.1rem" }} />
+                        Restore
                       </button>
-                    </div>
 
-                    <div>
                       <button
                         onClick={async (e) => {
                           e.stopPropagation();
@@ -151,8 +173,10 @@ function Archived_Instructor() {
                             alert(err.response?.data?.message || 'Failed to delete class.');
                           }
                         }}
-                        className="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors"
+                        className="archived-btn archived-btn-delete"
+                        title="Delete this class permanently"
                       >
+                        <DeleteIcon sx={{ fontSize: "1.1rem" }} />
                         Delete
                       </button>
                     </div>
@@ -161,7 +185,8 @@ function Archived_Instructor() {
               ))}
             </div>
           )}
-        </main>
+          </main>
+        </div>
       </div>
     </div>
   );

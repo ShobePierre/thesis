@@ -56,7 +56,8 @@ function SubClass() {
   const [studentFeedback, setStudentFeedback] = useState("");
   const [canvasEditorOpen, setCanvasEditorOpen] = useState(false);
   const [canvasEditorData, setCanvasEditorData] = useState(null);
-  const API_BASE_URL = "http://localhost:5000";
+  // Base API path (server is mounted under /api)
+  const API_BASE_URL = "http://localhost:5000/api";
 
   // Derived counts for UI
   const turnedInCount = Object.keys(studentSubmissions || {}).length;

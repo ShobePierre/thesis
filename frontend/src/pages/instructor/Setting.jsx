@@ -17,12 +17,40 @@ function Setting() {
       return;
     }
 
-    // Attempt to fetch instructor settings message (backend may vary)
+    // Fetch instructor settings and populate profile data
     axios
       .get("http://localhost:5000/api/instructor/setting", {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((res) => setMessage(res.data.message || "Instructor settings"))
+      .then((res) => {
+        setMessage(res.data.message || "Instructor settings");
+        
+        // Populate profile settings from backend response
+        if (res.data?.user) {
+          const userData = res.data.user;
+          setProfileSettings({
+            name: userData.username || 'Your name',
+            email: userData.email || '',
+            avatar: userData.avatar ? (userData.avatar.startsWith('http') ? userData.avatar : `http://localhost:5000${userData.avatar}`) : ''
+          });
+          
+          // Update localStorage for consistency
+          try {
+            localStorage.setItem('username', userData.username || 'Instructor');
+            localStorage.setItem('email', userData.email || '');
+            if (userData.avatar) {
+              const avatarUrl = userData.avatar.startsWith('http') ? userData.avatar : `http://localhost:5000${userData.avatar}`;
+              localStorage.setItem('instructor_profile', JSON.stringify({
+                name: userData.username || 'Your name',
+                email: userData.email || '',
+                avatar: avatarUrl
+              }));
+            }
+          } catch (e) {
+            console.warn('Failed to update localStorage', e);
+          }
+        }
+      })
       .catch((err) => {
         // Not fatal — show a friendly placeholder message
         console.error("Instructor settings fetch error", err?.response?.data || err);
