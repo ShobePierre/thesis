@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import QuizBuilder from "../../../activities/Quiz/QuizBuilder";
 import { CodeBlockParser } from "../../../features/DragDrop/utils/codeBlockParser";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import SaveIcon from "@mui/icons-material/Save";
 
 function ActivityBuilder({
   isOpen,
@@ -23,6 +27,9 @@ function ActivityBuilder({
   const [attachments, setAttachments] = useState([]);
   const [showQuizBuilder, setShowQuizBuilder] = useState(false);
   const [linkedQuizId, setLinkedQuizId] = useState(null);
+  const [activityStatus, setActivityStatus] = useState("draft");
+  const [autoSaveStatus, setAutoSaveStatus] = useState("");
+  const [dragOverIndex, setDragOverIndex] = useState(null);
   
   // Code Block Activity states
   const [codeBlockLanguage, setCodeBlockLanguage] = useState("python");
@@ -33,7 +40,47 @@ function ActivityBuilder({
   const [codeBlockHints, setCodeBlockHints] = useState({});
   const [parseError, setParseError] = useState("");
   
+  // Enhanced features
+  const [activityDescription, setActivityDescription] = useState("");
+  const [activityTags, setActivityTags] = useState([]);
+  const [showPreview, setShowPreview] = useState(false);
+  const [tagInput, setTagInput] = useState("");
+  
   const fileInputRef = React.useRef(null);
+  const dragOverRef = React.useRef(null);
+
+  // Auto-save effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (activityName || instructions || selectedActivity) {
+        setAutoSaveStatus("✓ Saved as draft");
+        setTimeout(() => setAutoSaveStatus(""), 2000);
+      }
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [activityName, instructions, selectedActivity]);
+
+  // Calculate completion percentage
+  const calculateCompletion = () => {
+    let completed = 0;
+    let total = 5;
+    
+    if (activityName) completed++;
+    if (selectedActivity) completed++;
+    if (openDateTime && dueDateTime) completed += 2;
+    if (instructions) completed++;
+    
+    return Math.round((completed / total) * 100);
+  };
+
+  const completionPercentage = calculateCompletion();
+  const completionSteps = [
+    { name: "Activity Name", done: !!activityName },
+    { name: "Activity Type", done: !!selectedActivity },
+    { name: "Time Restrictions", done: !!(openDateTime && dueDateTime) },
+    { name: "Instructions", done: !!instructions },
+    { name: "Publish", done: false },
+  ];
 
   // Parse code blocks when code changes
   const parseCodeBlocks = (code) => {
@@ -74,6 +121,17 @@ function ActivityBuilder({
     }));
   };
 
+  const addTag = () => {
+    if (tagInput.trim() && !activityTags.includes(tagInput.trim())) {
+      setActivityTags([...activityTags, tagInput.trim()]);
+      setTagInput("");
+    }
+  };
+
+  const removeTag = (tag) => {
+    setActivityTags(activityTags.filter(t => t !== tag));
+  };
+
   useEffect(() => {
     if (!isOpen) {
       attachments.forEach((a) => {
@@ -88,6 +146,7 @@ function ActivityBuilder({
       setCodeBlockHiddenIds([]);
       setCodeBlockHints({});
       setParseError("");
+      setShowPreview(false);
     }
   }, [isOpen]);
 
@@ -108,7 +167,6 @@ function ActivityBuilder({
       const next = prev === activity ? null : activity;
       setTitle(next ? next : "");
       
-      // Reset activity-specific states
       if (activity === "Quiz" && next !== "Quiz") {
         setShowQuizBuilder(false);
         setLinkedQuizId(null);
@@ -128,6 +186,28 @@ function ActivityBuilder({
   const handleQuizCreated = (quizId) => {
     setLinkedQuizId(quizId);
     setShowQuizBuilder(false);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setDragOverIndex(0);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverIndex(null);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOverIndex(null);
+    const files = e.dataTransfer.files ? Array.from(e.dataTransfer.files) : [];
+    if (files.length && selectedActivity === "DIY Activity") {
+      const items = files.map((f) => ({
+        file: f,
+        preview: f.type && f.type.startsWith("image/") ? URL.createObjectURL(f) : null,
+      }));
+      setAttachments((prev) => [...prev, ...items]);
+    }
   };
 
   if (!isOpen) return null;
@@ -171,18 +251,18 @@ function ActivityBuilder({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl mx-4 my-8"
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl mx-4 my-8"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="sticky top-0 bg-white flex items-center justify-between p-6 border-b border-gray-200 rounded-t-2xl z-10">
+        {/* Enhanced Header */}
+        <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-500 flex items-center justify-between p-6 rounded-t-2xl z-10 shadow-md">
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-lg transition"
+              className="p-2 hover:bg-white/20 rounded-lg transition text-white"
             >
               <svg
-                className="w-5 h-5 text-gray-600"
+                className="w-5 h-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -195,96 +275,182 @@ function ActivityBuilder({
                 />
               </svg>
             </button>
-            <h2 className="text-xl font-semibold text-gray-800">Create Activity</h2>
+            <h2 className="text-2xl font-bold text-white">Create Activity</h2>
+          </div>
+          <div className="flex items-center gap-3">
+            {autoSaveStatus && (
+              <span className="text-sm text-white/80 flex items-center gap-1">
+                <SaveIcon sx={{ fontSize: 16 }} /> {autoSaveStatus}
+              </span>
+            )}
+            <span className={`px-3 py-1 rounded-full text-xs font-bold text-white ${
+              activityStatus === "draft" ? "bg-yellow-500" :
+              activityStatus === "scheduled" ? "bg-blue-400" :
+              "bg-green-500"
+            }`}>
+              {activityStatus.toUpperCase()}
+            </span>
           </div>
         </div>
 
-        <div className="p-6 space-y-8 max-h-[calc(100vh-180px)] overflow-y-auto">
-          {/* Step 1: Activity Name */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-semibold text-sm">
-                1
-              </span>
-              <h3 className="text-lg font-semibold text-gray-800">
-                Enter the name.
-              </h3>
+        {/* Progress Indicator */}
+        <div className="px-6 pt-6 pb-4 bg-gray-50 border-b border-gray-200">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-gray-700">Progress</h3>
+            <span className="text-sm font-bold text-blue-600">{completionPercentage}%</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div
+              className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${completionPercentage}%` }}
+            />
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mt-4">
+            {completionSteps.map((step, idx) => (
+              <div key={idx} className="flex items-center gap-2">
+                {step.done ? (
+                  <CheckCircleIcon sx={{ fontSize: 18, color: "#10b981" }} />
+                ) : (
+                  <RadioButtonUncheckedIcon sx={{ fontSize: 18, color: "#d1d5db" }} />
+                )}
+                <span className={`text-xs font-medium ${step.done ? "text-green-700" : "text-gray-500"}`}>
+                  {step.name}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="p-6 space-y-8 max-h-[calc(100vh-280px)] overflow-y-auto">
+          {/* Step 1: Activity Name & Description */}
+          <div className="bg-white rounded-xl border-2 border-gray-200 p-6 shadow-sm hover:shadow-md transition">
+            <div className="flex items-center gap-3 mb-6">
+              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold">1</span>
+              <h3 className="text-lg font-semibold text-gray-800">Activity Details</h3>
             </div>
-            <div>
-              <input
-                type="text"
-                value={activityName}
-                onChange={(e) => setActivityName(e.target.value)}
-                placeholder="Activity name*"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800"
-              />
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Activity Name *</label>
+                <input
+                  type="text"
+                  value={activityName}
+                  onChange={(e) => setActivityName(e.target.value)}
+                  placeholder="e.g., Building a React Component, Python Basics Quiz"
+                  maxLength={100}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+                />
+                <p className="text-xs text-gray-500 mt-1">{activityName.length}/100</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Description (optional)</label>
+                <textarea
+                  value={activityDescription}
+                  onChange={(e) => setActivityDescription(e.target.value)}
+                  placeholder="Brief summary of what students will learn"
+                  rows={2}
+                  maxLength={200}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 resize-none"
+                />
+                <p className="text-xs text-gray-500 mt-1">{activityDescription.length}/200</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Tags (optional)</label>
+                <div className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
+                    placeholder="Add tags... (press Enter)"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+                  />
+                  <button
+                    type="button"
+                    onClick={addTag}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-sm"
+                  >
+                    Add
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {activityTags.map((tag) => (
+                    <span key={tag} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium flex items-center gap-2">
+                      {tag}
+                      <button onClick={() => removeTag(tag)} className="hover:text-blue-900">✕</button>
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Step 2: Activity Type - moved here */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+          {/* Step 2: Activity Type */}
+          <div className="bg-white rounded-xl border-2 border-gray-200 p-6 shadow-sm hover:shadow-md transition">
             <div className="flex items-center gap-3 mb-6">
-              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-semibold text-sm">
-                2
-              </span>
-              <h3 className="text-lg font-semibold text-gray-800">
-                Set the activity you want for student.
-              </h3>
+              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold">2</span>
+              <h3 className="text-lg font-semibold text-gray-800">Activity Type *</h3>
             </div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Activity Type *
-            </label>
-            <div className="flex flex-wrap gap-3">
-              {["Sim Pc", "Quiz", "Code Block Activity", "DIY Activity"].map((activity) => {
-                const selected = selectedActivity === activity;
+            <label className="block text-sm font-medium text-gray-700 mb-3">Choose activity type:</label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+              {[
+                { name: "Sim Pc", emoji: "💻", desc: "Hardware simulation" },
+                { name: "Quiz", emoji: "❓", desc: "Assessment & testing" },
+                { name: "Code Block Activity", emoji: "🧩", desc: "Visual coding" },
+                { name: "DIY Activity", emoji: "🔧", desc: "Hands-on project" },
+              ].map((activity) => {
+                const selected = selectedActivity === activity.name;
                 return (
                   <button
                     type="button"
-                    key={activity}
-                    onClick={() => handleActivityToggle(activity)}
-                    className={`px-4 py-2 rounded-lg font-medium transition inline-flex items-center gap-2 ${
+                    key={activity.name}
+                    onClick={() => handleActivityToggle(activity.name)}
+                    className={`p-4 rounded-xl font-semibold transition transform hover:scale-105 border-2 ${
                       selected
-                        ? "bg-blue-600 text-white shadow-lg"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        ? "bg-blue-600 text-white border-blue-700 shadow-lg"
+                        : "bg-white text-gray-700 border-gray-200 hover:border-blue-400"
                     }`}
                   >
-                    {activity}
+                    <div className="text-2xl mb-2">{activity.emoji}</div>
+                    <div className="font-bold">{activity.name}</div>
+                    <div className={`text-xs ${selected ? "text-blue-100" : "text-gray-500"}`}>{activity.desc}</div>
                   </button>
                 );
               })}
             </div>
 
             {/* Activity Type Descriptions */}
-            <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              {selectedActivity && (
+            {selectedActivity && (
+              <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
                 <div className="space-y-2">
                   {(() => {
                     const activity = selectedActivity;
                     const descriptions = {
-                      "Sim Pc": "Interactive PC building simulator where students learn hardware components by dragging parts to correct slots. A hands-on learning experience for computer architecture.",
-                      "Quiz": "Multiple choice or short answer questions to test student knowledge.",
-                      "Code Block Activity": "Drag-and-drop code block activity inspired by MIT App Inventor. Students arrange code blocks to complete programs while learning programming concepts.",
-                      "DIY Activity": "Hands-on DIY activities for students to conduct and observe outcomes.",
+                      "Sim Pc": "Interactive PC building simulator where students learn hardware components by dragging parts to correct slots. Perfect for computer architecture courses.",
+                      "Quiz": "Assessment tool with multiple choice and short answer questions. Track student knowledge and generate detailed analytics.",
+                      "Code Block Activity": "Drag-and-drop visual coding inspired by MIT App Inventor. Students arrange code blocks to complete programs.",
+                      "DIY Activity": "Hands-on projects where students conduct experiments and submit their work.",
                     };
                     return (
-                      <div key={activity} className="text-sm">
-                        <span className="font-semibold text-blue-900">{activity}:</span>
-                        <p className="text-blue-800">{descriptions[activity]}</p>
+                      <div key={activity}>
+                        <p className="font-semibold text-blue-900 text-sm">{activity}</p>
+                        <p className="text-blue-800 text-sm mt-1">{descriptions[activity]}</p>
                       </div>
                     );
                   })()}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Quiz-Specific Section */}
             {selectedActivity === "Quiz" && (
-              <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+              <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg">
                 {linkedQuizId ? (
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-semibold text-green-900">✓ Linked Quiz: (ID: {linkedQuizId})</p>
-                      <p className="text-xs text-green-700 mt-1">Your quiz is ready to be published with this activity.</p>
+                      <p className="text-sm font-semibold text-purple-900">✓ Quiz Linked</p>
+                      <p className="text-xs text-purple-700 mt-1">Quiz ID: {linkedQuizId}</p>
                     </div>
                     <button
                       type="button"
@@ -292,16 +458,16 @@ function ActivityBuilder({
                         setLinkedQuizId(null);
                         setShowQuizBuilder(true);
                       }}
-                      className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition"
+                      className="px-4 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-medium"
                     >
-                      Change Quiz
+                      Edit Quiz
                     </button>
                   </div>
                 ) : (
                   <button
                     type="button"
                     onClick={() => setShowQuizBuilder(true)}
-                    className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition"
+                    className="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-lg font-semibold hover:shadow-lg transition"
                   >
                     + Create New Quiz
                   </button>
@@ -311,184 +477,188 @@ function ActivityBuilder({
 
             {/* Code Block Activity Section */}
             {selectedActivity === "Code Block Activity" && (
-              <div className="mt-6 space-y-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
-                {/* Language Selector */}
+              <div className="mt-6 space-y-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Programming Language *
-                  </label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Programming Language *</label>
                   <select
                     value={codeBlockLanguage}
                     onChange={(e) => {
                       setCodeBlockLanguage(e.target.value);
                       parseCodeBlocks(codeBlockCode);
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-800"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-800 font-medium"
                   >
-                    <option value="python">Python</option>
-                    <option value="javascript">JavaScript</option>
-                    <option value="java">Java</option>
-                    <option value="cpp">C++</option>
+                    <option value="python">🐍 Python</option>
+                    <option value="javascript">📜 JavaScript</option>
+                    <option value="java">☕ Java</option>
+                    <option value="cpp">⚙️ C++</option>
                   </select>
                 </div>
 
-                {/* Code Editor */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Source Code *
-                  </label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Source Code *</label>
                   <textarea
                     value={codeBlockCode}
                     onChange={(e) => handleCodeChange(e.target.value)}
                     placeholder={`Paste your ${codeBlockLanguage.charAt(0).toUpperCase() + codeBlockLanguage.slice(1)} code here...`}
-                    rows={8}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 font-mono text-sm text-gray-800 resize-none"
+                    rows={10}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 font-mono text-sm text-gray-800 resize-none bg-gray-900 text-white"
                   />
                   {parseError && (
-                    <p className="mt-2 text-sm text-red-600">⚠️ {parseError}</p>
+                    <p className="mt-2 text-sm text-red-600 font-semibold">⚠️ {parseError}</p>
                   )}
                 </div>
 
-                {/* Block Preview */}
                 {codeBlockBlocks.length > 0 && (
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Code Blocks ({codeBlockBlocks.length} found)
-                    </label>
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                    <div className="flex items-center justify-between mb-3">
+                      <label className="block text-sm font-semibold text-gray-700">
+                        Code Blocks ({codeBlockBlocks.length})
+                      </label>
+                      <span className="text-xs bg-green-200 text-green-800 px-2 py-1 rounded-full font-bold">
+                        {codeBlockHiddenIds.length} Hidden
+                      </span>
+                    </div>
+                    <div className="space-y-2 max-h-64 overflow-y-auto">
                       {codeBlockBlocks.map((block, idx) => {
                         const isHidden = codeBlockHiddenIds.includes(block.id);
                         const blockTypeColors = {
-                          VARIABLE: "bg-green-100 border-green-300",
-                          FUNCTION: "bg-blue-100 border-blue-300",
-                          KEYWORD: "bg-yellow-100 border-yellow-300",
-                          OPERATOR: "bg-orange-100 border-orange-300",
-                          LITERAL: "bg-red-100 border-red-300",
-                          STATEMENT: "bg-indigo-100 border-indigo-300",
-                          CONDITION: "bg-pink-100 border-pink-300",
-                          LOOP: "bg-cyan-100 border-cyan-300",
+                          VARIABLE: "bg-green-100 border-green-400",
+                          FUNCTION: "bg-blue-100 border-blue-400",
+                          KEYWORD: "bg-yellow-100 border-yellow-400",
+                          OPERATOR: "bg-orange-100 border-orange-400",
+                          LITERAL: "bg-red-100 border-red-400",
+                          STATEMENT: "bg-indigo-100 border-indigo-400",
+                          CONDITION: "bg-pink-100 border-pink-400",
+                          LOOP: "bg-cyan-100 border-cyan-400",
                         };
                         
                         return (
-                          <div key={block.id} className={`p-3 rounded-lg border-2 ${blockTypeColors[block.type] || "bg-gray-100"}`}>
+                          <div key={block.id} className={`p-3 rounded-lg border-2 transition ${blockTypeColors[block.type] || "bg-gray-100"}`}>
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1 min-w-0">
-                                <p className="text-xs font-semibold text-gray-600">{block.type}</p>
+                                <p className="text-xs font-bold text-gray-700">{block.type}</p>
                                 <p className="text-sm text-gray-800 font-mono break-words">{block.content}</p>
                               </div>
                               <button
                                 type="button"
                                 onClick={() => toggleHiddenBlock(block.id)}
-                                className={`px-2 py-1 text-xs font-semibold rounded whitespace-nowrap transition ${
+                                className={`px-3 py-1 text-xs font-bold rounded whitespace-nowrap transition ${
                                   isHidden
-                                    ? "bg-red-500 text-white"
-                                    : "bg-gray-300 text-gray-700 hover:bg-gray-400"
+                                    ? "bg-red-500 text-white hover:bg-red-600"
+                                    : "bg-green-400 text-white hover:bg-green-500"
                                 }`}
                               >
-                                {isHidden ? "Hidden" : "Show"}
+                                {isHidden ? "Hidden" : "Visible"}
                               </button>
                             </div>
 
-                            {/* Hint Input for Hidden Blocks */}
                             {isHidden && (
-                              <div className="mt-2 pt-2 border-t border-gray-300">
+                              <div className="mt-3 pt-3 border-t border-gray-300">
                                 <textarea
                                   value={codeBlockHints[block.id] || ""}
                                   onChange={(e) => updateHint(block.id, e.target.value)}
-                                  placeholder="Add a hint for students (optional)..."
+                                  placeholder="Add a hint for students..."
                                   rows={2}
-                                  maxLength={200}
-                                  className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-purple-400 text-gray-700 resize-none"
+                                  maxLength={150}
+                                  className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-green-400 text-gray-700 resize-none"
                                 />
-                                <p className="text-xs text-gray-500 mt-1">
-                                  {(codeBlockHints[block.id] || "").length}/200 characters
-                                </p>
+                                <p className="text-xs text-gray-600 mt-1">{(codeBlockHints[block.id] || "").length}/150</p>
                               </div>
                             )}
                           </div>
                         );
                       })}
                     </div>
-                    <p className="mt-3 text-sm text-purple-700">
-                      📝 Hidden blocks: {codeBlockHiddenIds.length} / {codeBlockBlocks.length}
-                    </p>
                   </div>
                 )}
 
-                {/* Difficulty Level */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Difficulty Level
-                  </label>
-                  <div className="flex gap-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Difficulty Level</label>
+                  <div className="flex gap-3">
                     {["easy", "medium", "hard"].map((level) => (
                       <button
                         key={level}
                         type="button"
                         onClick={() => setCodeBlockDifficulty(level)}
-                        className={`px-4 py-2 rounded-lg font-medium capitalize transition ${
+                        className={`flex-1 px-4 py-2 rounded-lg font-bold capitalize transition ${
                           codeBlockDifficulty === level
-                            ? "bg-purple-600 text-white"
-                            : "bg-white border border-gray-300 text-gray-700 hover:border-purple-400"
+                            ? "bg-green-600 text-white shadow-lg"
+                            : "bg-white border-2 border-green-300 text-gray-700 hover:border-green-400"
                         }`}
                       >
-                        {level}
+                        {level === "easy" ? "🟢" : level === "medium" ? "🟡" : "🔴"} {level}
                       </button>
                     ))}
                   </div>
                 </div>
               </div>
             )}
-
-            <p className="mt-3 text-xs text-gray-500">*Required</p>
           </div>
 
-          {/* Add Attachment - only for DIY Activity (no step number) */}
+          {/* Attachments - only for DIY Activity */}
           {selectedActivity === "DIY Activity" && (
-          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-            <div className="flex items-center gap-3 mb-4">
-              <h3 className="text-lg font-semibold text-gray-800">
-                Add Attachment.
-              </h3>
-            </div>
-            <div>
-              <div className="flex items-center gap-3">
+            <div className="bg-white rounded-xl border-2 border-gray-200 p-6 shadow-sm hover:shadow-md transition">
+              <div className="flex items-center gap-3 mb-6">
+                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold">3</span>
+                <h3 className="text-lg font-semibold text-gray-800">Add Resources</h3>
+              </div>
+
+              <div
+                ref={dragOverRef}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`border-2 border-dashed rounded-xl p-8 text-center transition ${
+                  dragOverIndex === 0
+                    ? "border-blue-600 bg-blue-50"
+                    : "border-gray-300 bg-gray-50 hover:border-blue-400"
+                }`}
+              >
+                <CloudUploadIcon sx={{ fontSize: 48, color: dragOverIndex === 0 ? "#2563eb" : "#9ca3af", marginBottom: 1 }} />
+                <p className="font-semibold text-gray-700 mb-2">Drag files here or click to browse</p>
+                <p className="text-sm text-gray-500 mb-4">Images, documents, videos, and more</p>
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
                 >
-                  Add attachment
+                  Browse Files
                 </button>
-                <p className="text-sm text-gray-500">You can add files that students will use for this activity.</p>
               </div>
 
               {attachments.length > 0 && (
-                <div className="mt-4 space-y-2">
-                  {attachments.map((item, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-2 bg-gray-50 border border-gray-200 rounded-lg">
-                      <div className="flex items-center gap-3 min-w-0">
-                        {item.preview ? (
-                          <img src={item.preview} alt={item.file.name} className="w-12 h-12 object-cover rounded" />
-                        ) : (
-                          <div className="w-12 h-12 flex items-center justify-center bg-gray-100 rounded text-sm text-gray-600">{item.file.name.split('.').pop()}</div>
-                        )}
-                        <div className="min-w-0">
-                          <div className="text-sm text-gray-600 truncate">{item.file.name}</div>
+                <div className="mt-6">
+                  <h4 className="font-semibold text-gray-700 mb-3">{attachments.length} file(s) attached</h4>
+                  <div className="space-y-2">
+                    {attachments.map((item, idx) => (
+                      <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg hover:shadow-sm transition">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          {item.preview ? (
+                            <img src={item.preview} alt={item.file.name} className="w-10 h-10 object-cover rounded" />
+                          ) : (
+                            <div className="w-10 h-10 flex items-center justify-center bg-blue-100 rounded font-bold text-blue-600 text-xs">
+                              {item.file.name.split('.').pop().toUpperCase()}
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <div className="text-sm font-medium text-gray-800 truncate">{item.file.name}</div>
+                            <div className="text-xs text-gray-500">{(item.file.size / 1024 / 1024).toFixed(2)} MB</div>
+                          </div>
                         </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (item.preview) URL.revokeObjectURL(item.preview);
+                            setAttachments((prev) => prev.filter((_, i) => i !== idx));
+                          }}
+                          className="px-3 py-1 text-sm font-semibold text-red-600 hover:bg-red-50 rounded transition"
+                        >
+                          Remove
+                        </button>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (item.preview) URL.revokeObjectURL(item.preview);
-                          setAttachments((prev) => prev.filter((_, i) => i !== idx));
-                        }}
-                        className="text-sm text-red-600 hover:underline"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               )}
 
@@ -510,116 +680,112 @@ function ActivityBuilder({
                 }}
               />
             </div>
-          </div>
           )}
 
-          {/* Step 4 (or 3 if not Experiment): Time Restrictions */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+          {/* Time Restrictions */}
+          <div className="bg-white rounded-xl border-2 border-gray-200 p-6 shadow-sm hover:shadow-md transition">
             <div className="flex items-center gap-3 mb-6">
-              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-semibold text-sm">
+              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold">
                 {selectedActivity === "DIY Activity" ? "4" : "3"}
               </span>
-              <h3 className="text-lg font-semibold text-gray-800">
-                Set the time restrictions for your activity.
-              </h3>
+              <h3 className="text-lg font-semibold text-gray-800">Schedule Availability *</h3>
             </div>
-            <div className="space-y-6">
-              {/* Open date and time */}
+            <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Open date and time*
-                </label>
-                <div className="relative">
-                  <input
-                    type="datetime-local"
-                    value={openDateTime}
-                    onChange={(e) => setOpenDateTime(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800"
-                  />
-                  <svg
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
-                </div>
-                <p className="mt-2 text-sm text-gray-500">
-                  This will be the date and time when your students can start the activity.
-                </p>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Open Date & Time</label>
+                <input
+                  type="datetime-local"
+                  value={openDateTime}
+                  onChange={(e) => setOpenDateTime(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 font-medium"
+                />
+                <p className="text-xs text-gray-600 mt-2">When students can start</p>
               </div>
 
-              {/* Due date and time */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Due date and time*
-                </label>
-                <div className="relative">
-                  <input
-                    type="datetime-local"
-                    value={dueDateTime}
-                    onChange={(e) => setDueDateTime(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800"
-                  />
-                  <svg
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
-                </div>
-                <p className="mt-2 text-sm text-gray-500">
-                  This will be the date and time when your students cannot access the activity anymore.
-                </p>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Due Date & Time</label>
+                <input
+                  type="datetime-local"
+                  value={dueDateTime}
+                  onChange={(e) => setDueDateTime(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 font-medium"
+                />
+                <p className="text-xs text-gray-600 mt-2">When it's no longer accessible</p>
               </div>
             </div>
           </div>
 
-          {/* Step 5 (or 4 if not Experiment): Instructions Section */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+          {/* Instructions */}
+          <div className="bg-white rounded-xl border-2 border-gray-200 p-6 shadow-sm hover:shadow-md transition">
             <div className="flex items-center gap-3 mb-6">
-              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-semibold text-sm">
+              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold">
                 {selectedActivity === "DIY Activity" ? "5" : "4"}
               </span>
-              <h3 className="text-lg font-semibold text-gray-800">
-                Add instructions for your activity.
-              </h3>
+              <h3 className="text-lg font-semibold text-gray-800">Instructions for Students</h3>
             </div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Instructions (optional)
-            </label>
-            <div className="border border-gray-300 rounded-lg">
+            <div className="border border-gray-300 rounded-lg overflow-hidden">
               <textarea
                 value={instructions}
                 onChange={(e) => setInstructions(e.target.value)}
-                placeholder="Instructions (optional)"
-                rows={8}
-                className="w-full px-4 py-3 border-0 rounded-t-lg focus:outline-none text-gray-800 resize-none"
+                placeholder="Provide clear, detailed instructions for students. Include learning objectives, steps, and expectations."
+                rows={10}
+                className="w-full px-4 py-3 border-0 focus:outline-none text-gray-800 resize-none font-medium"
               />
             </div>
+            <p className="text-xs text-gray-600 mt-2">💡 Tip: Clear instructions help students understand what's expected</p>
           </div>
 
-          {/* Action Buttons */}
-          <div className="sticky bottom-0 bg-white flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
+          {/* Preview Section */}
+          {showPreview && (
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-300 p-6 shadow-md">
+              <h3 className="text-lg font-bold text-blue-900 mb-4">📋 Activity Preview</h3>
+              <div className="bg-white rounded-lg p-6 space-y-4">
+                <div>
+                  <p className="text-xs text-gray-600 font-bold uppercase">Activity Name</p>
+                  <p className="text-lg font-bold text-gray-900">{activityName || "Untitled Activity"}</p>
+                </div>
+                {activityDescription && (
+                  <div>
+                    <p className="text-xs text-gray-600 font-bold uppercase">Description</p>
+                    <p className="text-sm text-gray-700">{activityDescription}</p>
+                  </div>
+                )}
+                <div>
+                  <p className="text-xs text-gray-600 font-bold uppercase">Type</p>
+                  <p className="text-sm font-semibold text-blue-600">{selectedActivity || "Not selected"}</p>
+                </div>
+                {activityTags.length > 0 && (
+                  <div>
+                    <p className="text-xs text-gray-600 font-bold uppercase mb-2">Tags</p>
+                    <div className="flex flex-wrap gap-2">
+                      {activityTags.map(tag => (
+                        <span key={tag} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-semibold">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="sticky bottom-0 bg-gradient-to-r from-gray-50 to-white flex items-center justify-between gap-3 p-6 border-t border-gray-200 rounded-b-2xl shadow-md">
+          <button
+            onClick={() => setShowPreview(!showPreview)}
+            className="px-4 py-2 text-gray-700 font-semibold hover:bg-gray-100 rounded-lg transition"
+          >
+            {showPreview ? "Hide Preview" : "Preview"}
+          </button>
+          <div className="flex gap-3">
             <button
               onClick={() => {
                 onReset();
                 onClose();
               }}
-              className="px-6 py-2 text-gray-600 font-medium hover:bg-gray-100 rounded-lg transition"
+              className="px-6 py-2 text-gray-700 font-semibold hover:bg-gray-100 rounded-lg transition"
             >
               Cancel
             </button>
@@ -645,7 +811,7 @@ function ActivityBuilder({
                 (selectedActivity === "Code Block Activity" && (!codeBlockCode || codeBlockBlocks.length === 0)) ||
                 isCreatingActivity
               }
-              className={`px-6 py-2 rounded-lg font-medium transition ${
+              className={`px-8 py-2 rounded-lg font-bold transition transform ${
                 activityName &&
                 openDateTime &&
                 dueDateTime &&
@@ -653,8 +819,8 @@ function ActivityBuilder({
                 (selectedActivity !== "Quiz" || linkedQuizId) &&
                 (selectedActivity !== "Code Block Activity" || (codeBlockCode && codeBlockBlocks.length > 0)) &&
                 !isCreatingActivity
-                  ? "bg-blue-600 text-white hover:bg-blue-700"
-                  : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:shadow-lg hover:scale-105"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
               }`}
             >
               {isCreatingActivity ? "Creating..." : "Create Activity"}

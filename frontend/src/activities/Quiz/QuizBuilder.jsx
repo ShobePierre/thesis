@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import API from '../../api';
 
 const API_URL = 'http://localhost:5000/api/quiz';
@@ -185,18 +186,18 @@ const QuizBuilder = ({ onQuizCreated, onQuizSelected, quizId = null }) => {
 
       setLoading(true);
 
-      let quizId;
-      if (mode === 'edit') {
-        await API.put(`/quiz/${quizId}`, quiz);
+      let currentQuizId = quizId;
+      if (mode === 'edit' && currentQuizId) {
+        await API.put(`/quiz/${currentQuizId}`, quiz);
       } else {
         const response = await API.post('/quiz', quiz);
-        quizId = response.data.quiz_id;
+        currentQuizId = response.data.quiz_id;
       }
 
       for (let question of questions) {
         if (!question.question_id) {
-          const qResponse = await API.post(`/quiz/${quizId}/questions`, {
-            quiz_id: quizId,
+          const qResponse = await API.post(`/quiz/${currentQuizId}/questions`, {
+            quiz_id: currentQuizId,
             question_text: question.question_text,
             question_type: question.question_type,
             points: question.points,
@@ -230,10 +231,11 @@ const QuizBuilder = ({ onQuizCreated, onQuizSelected, quizId = null }) => {
       setSuccess('Quiz Created Successfully ✓');
       setLoading(false);
       if (onQuizCreated) {
-        onQuizCreated(quizId);
+        onQuizCreated(currentQuizId);
       }
       setTimeout(() => setSuccess(''), 2000);
     } catch (err) {
+      console.error('Quiz save error:', err.response?.data || err.message);
       setError(err.response?.data?.message || 'Failed to save quiz');
       setLoading(false);
     }

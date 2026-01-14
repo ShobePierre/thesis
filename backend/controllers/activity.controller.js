@@ -609,158 +609,278 @@ exports.submitActivity = (req, res) => {
       return res.status(400).json({ message: "Missing activity_id or student_id" });
     }
 
-    // First check whether the student already has a submission for this activity
-    const checkSql = `SELECT submission_id FROM activity_submissions WHERE activity_id = ? AND student_id = ? LIMIT 1`;
-    // Determine whether submission is late by checking activity's config_json.due_date_time
-    const activitySql = `SELECT config_json FROM activities WHERE activity_id = ? LIMIT 1`;
-    db.query(activitySql, [id], (aErr, aRows) => {
-      if (aErr) {
-        console.error('Failed to fetch activity for lateness check:', aErr);
-        // fallback to insert without is_late
-        db.query(submissionSql, [id, student_id, submission_text || ''], (err, result) => {
-          if (err) {
-            console.error('Failed to insert submission:', err);
-            return res.status(500).json({ message: "Failed to submit activity", error: err.message });
+    // Check if this is a codeblock activity (stored as 'other' type with blocks in config_json)
+    const activityTypeSql = `SELECT type, config_json FROM activities WHERE activity_id = ? LIMIT 1`;
+    db.query(activityTypeSql, [id], (typeErr, typeRows) => {
+      if (typeErr) {
+        console.error('Failed to fetch activity type:', typeErr);
+        return res.status(500).json({ message: 'Failed to check activity type', error: typeErr.message });
+      }
+
+      if (!typeRows || typeRows.length === 0) {
+        return res.status(404).json({ message: 'Activity not found' });
+      }
+
+      const activityType = typeRows[0].type;
+      const configJson = typeRows[0].config_json;
+      
+      // Check if this is a codeblock activity (type='other' with 'blocks' in config)
+      let isCodeblock = false;
+      try {
+        const config = JSON.parse(configJson || '{}');
+        isCodeblock = config.blocks && Array.isArray(config.blocks);
+      } catch (e) {
+        // If we can't parse config, treat as regular activity
+      }
+
+      // Handle codeblock activity submissions specially
+      if (isCodeblock) {
+        return handleCodeblockSubmission(id, student_id, submission_text, checkpoint_data, configJson, req.files || [], res);
+      }
+
+      // Continue with regular submission for other activity types
+      return handleRegularSubmission(id, student_id, submission_text, checkpoint_data, configJson, req.files || [], res);
+    });
+  } catch (err) {
+    console.error('Error in submitActivity:', err);
+    return res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+// Handler for codeblock-specific submissions
+const handleCodeblockSubmission = (activityId, studentId, submissionText, checkpointData, configJson, files, res) => {
+  try {
+    // Parse checkpoint data to check if submission is correct
+    let validationData = {};
+    try {
+      validationData = JSON.parse(checkpointData || '{}');
+    } catch (e) {
+      validationData = JSON.parse(submissionText || '{}');
+    }
+
+    const isCorrect = validationData.correct === true;
+
+    // Check if student already submitted this activity
+    const checkSql = `SELECT submission_id, is_correct FROM activity_submissions 
+                      WHERE activity_id = ? AND student_id = ? LIMIT 1`;
+    db.query(checkSql, [activityId, studentId], (checkErr, checkRows) => {
+      if (checkErr) {
+        console.error('Failed to check existing submission:', checkErr);
+        return res.status(500).json({ message: 'Failed to submit activity', error: checkErr.message });
+      }
+
+      // If already submitted correctly, prevent re-submission
+      if (checkRows && checkRows.length > 0 && checkRows[0].is_correct === 1) {
+        return res.status(403).json({ 
+          message: 'Activity already completed successfully. You cannot re-submit a completed activity.',
+          submission_id: checkRows[0].submission_id,
+          already_completed: true
+        });
+      }
+
+      // Check if this is an update (resubmission) or new submission
+      if (checkRows && checkRows.length > 0) {
+        // Update existing submission
+        const existingSubmissionId = checkRows[0].submission_id;
+        const updateSql = `UPDATE activity_submissions 
+                          SET submission_text = ?, checkpoint_data = ?, is_correct = ?, updated_at = NOW() 
+                          WHERE submission_id = ?`;
+        
+        db.query(updateSql, [submissionText || '', checkpointData || null, isCorrect ? 1 : 0, existingSubmissionId], (updateErr) => {
+          if (updateErr) {
+            console.error('Failed to update submission:', updateErr);
+            return res.status(500).json({ message: 'Failed to submit activity', error: updateErr.message });
+          }
+
+          // Update activity status in student's activity list if correct
+          if (isCorrect) {
+            updateActivityStatus(activityId, studentId, 'completed', validationData.score || 0);
+          }
+
+          return res.status(200).json({
+            message: 'Submission updated successfully',
+            submission_id: existingSubmissionId,
+            activity_id: activityId,
+            student_id: studentId,
+            is_correct: isCorrect,
+            score: validationData.score || 0
+          });
+        });
+      } else {
+        // Insert new submission
+        const insertSql = `INSERT INTO activity_submissions 
+                          (activity_id, student_id, submission_text, checkpoint_data, is_correct, submitted_at)
+                          VALUES (?, ?, ?, ?, ?, NOW())`;
+
+        db.query(insertSql, [activityId, studentId, submissionText || '', checkpointData || null, isCorrect ? 1 : 0], (insertErr, result) => {
+          if (insertErr) {
+            console.error('Failed to insert submission:', insertErr);
+            return res.status(500).json({ message: 'Failed to submit activity', error: insertErr.message });
           }
 
           const submissionId = result.insertId;
-          const files = req.files || [];
-          if (files.length > 0) {
-            const attachSql = `INSERT INTO activity_submission_attachments (submission_id, original_name, stored_name, file_path, mime_type, file_size, uploaded_at)
-                               VALUES ?`;
-            const values = files.map((f) => [submissionId, f.originalname, f.filename, `/uploads/activity_files/${f.filename}`, f.mimetype, f.size, new Date()]);
 
-            db.query(attachSql, [values], (aErr2, aRes) => {
-              if (aErr2) {
-                console.error('Failed to save submission attachment metadata:', aErr2);
-                return res.status(201).json({
-                  message: 'Submission created, but failed to save attachments',
-                  submission_id: submissionId,
-                  activity_id: id,
-                  student_id
-                });
+          // Update activity status if correct
+          if (isCorrect) {
+            updateActivityStatus(activityId, studentId, 'completed', validationData.score || 0);
+          }
+
+          // Save file attachments if any
+          if (files.length > 0) {
+            const attachSql = `INSERT INTO activity_submission_attachments 
+                              (submission_id, original_name, stored_name, file_path, mime_type, file_size, uploaded_at) 
+                              VALUES ?`;
+            const values = files.map((f) => [
+              submissionId, 
+              f.originalname, 
+              f.filename, 
+              `/uploads/activity_files/${f.filename}`, 
+              f.mimetype, 
+              f.size, 
+              new Date()
+            ]);
+
+            db.query(attachSql, [values], (attachErr) => {
+              if (attachErr) {
+                console.error('Failed to save attachments:', attachErr);
               }
 
               return res.status(201).json({
                 message: 'Submission submitted successfully',
                 submission_id: submissionId,
-                activity_id: id,
-                student_id
+                activity_id: activityId,
+                student_id: studentId,
+                is_correct: isCorrect,
+                score: validationData.score || 0
               });
             });
           } else {
-            res.status(201).json({
+            return res.status(201).json({
               message: 'Submission submitted successfully',
               submission_id: submissionId,
-              activity_id: id,
-              student_id
+              activity_id: activityId,
+              student_id: studentId,
+              is_correct: isCorrect,
+              score: validationData.score || 0
             });
           }
         });
-        return;
+      }
+    });
+  } catch (err) {
+    console.error('Error in handleCodeblockSubmission:', err);
+    return res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+// Helper function to update activity status
+const updateActivityStatus = (activityId, studentId, status, score) => {
+  // This would typically update a student_activity_status table or similar
+  // For now, just log it
+  console.log(`Activity ${activityId} marked as ${status} for student ${studentId} with score ${score}`);
+};
+
+// Handler for regular activity submissions
+const handleRegularSubmission = (activityId, studentId, submissionText, checkpointData, configJson, files, res) => {
+  try {
+    // First check whether the student already has a submission for this activity
+    const checkSql = `SELECT submission_id FROM activity_submissions WHERE activity_id = ? AND student_id = ? LIMIT 1`;
+
+    // Check open_date_time first: if open_date_time exists and now is earlier, prevent submissions
+    let isLate = 0;
+    try {
+      const cfg = JSON.parse(configJson || '{}');
+      if (cfg && cfg.open_date_time) {
+        const openAt = new Date(cfg.open_date_time);
+        const now = new Date();
+        if (now < openAt) {
+          // Activity not open yet
+          return res.status(403).json({ message: `Activity not open yet. It opens at ${openAt.toISOString()}` });
+        }
       }
 
-      // Check open_date_time first: if open_date_time exists and now is earlier, prevent submissions
-      try {
-        if (cfg && cfg.open_date_time) {
-          const openAt = new Date(cfg.open_date_time);
-          const now = new Date();
-          if (now < openAt) {
-            // Activity not open yet
-            return res.status(403).json({ message: `Activity not open yet. It opens at ${openAt.toISOString()}` });
+      if (cfg && cfg.due_date_time) {
+        const due = new Date(cfg.due_date_time);
+        const now = new Date();
+        if (now > due) isLate = 1;
+      }
+    } catch (parseErr) {
+      // ignore parse errors
+    }
+
+    // Now check for existing submission to support resubmission (update)
+    db.query(checkSql, [activityId, studentId], (cErr, cRows) => {
+      if (cErr) {
+        console.error('Failed to check existing submission:', cErr);
+        return res.status(500).json({ message: 'Failed to submit activity', error: cErr.message });
+      }
+
+      if (cRows && cRows.length > 0) {
+        // Update existing submission
+        const existingSubmissionId = cRows[0].submission_id;
+        const updateSql = `UPDATE activity_submissions SET submission_text = ?, checkpoint_data = ?, updated_at = NOW() WHERE submission_id = ?`;
+        db.query(updateSql, [submissionText || '', checkpointData || null, existingSubmissionId], (uErr, uRes) => {
+          if (uErr) {
+            console.error('Failed to update submission:', uErr);
+            return res.status(500).json({ message: 'Failed to submit activity', error: uErr.message });
           }
-        }
-      } catch (openChkErr) {
-        // ignore parse errors and continue to due-date check
+
+          // add any newly uploaded attachments (append to existing ones)
+          if (files.length > 0) {
+            const attachSql = `INSERT INTO activity_submission_attachments (submission_id, original_name, stored_name, file_path, mime_type, file_size, uploaded_at) VALUES ?`;
+            const values = files.map((f) => [existingSubmissionId, f.originalname, f.filename, `/uploads/activity_files/${f.filename}`, f.mimetype, f.size, new Date()]);
+            db.query(attachSql, [values], (aErr) => {
+              if (aErr) {
+                console.error('Failed to save submission attachment metadata (on update):', aErr);
+                return res.status(200).json({ message: 'Submission updated, but failed to save attachments', submission_id: existingSubmissionId, activity_id: activityId, student_id: studentId });
+              }
+              return res.status(200).json({ message: 'Submission updated successfully', submission_id: existingSubmissionId, activity_id: activityId, student_id: studentId });
+            });
+          } else {
+            return res.status(200).json({ message: 'Submission updated successfully', submission_id: existingSubmissionId, activity_id: activityId, student_id: studentId });
+          }
+        });
+      } else {
+        // Insert new submission record
+        const submissionSqlWithLate = `INSERT INTO activity_submissions (activity_id, student_id, submission_text, checkpoint_data, submitted_at)
+                         VALUES (?, ?, ?, ?, NOW())`;
+
+        db.query(submissionSqlWithLate, [activityId, studentId, submissionText || '', checkpointData || null], (err, result) => {
+          if (err) {
+            console.error('Failed to insert submission:', err);
+            return res.status(500).json({ message: 'Failed to submit activity', error: err.message });
+          }
+
+          const submissionId = result.insertId;
+
+          // If files were uploaded via multer, save their metadata in activity_submission_attachments
+          if (files.length > 0) {
+            const attachSql = `INSERT INTO activity_submission_attachments (submission_id, original_name, stored_name, file_path, mime_type, file_size, uploaded_at)
+                           VALUES ?`;
+            const values = files.map((f) => [submissionId, f.originalname, f.filename, `/uploads/activity_files/${f.filename}`, f.mimetype, f.size, new Date()]);
+
+            db.query(attachSql, [values], (aErr, aRes) => {
+              if (aErr) {
+                console.error('Failed to save submission attachment metadata:', aErr);
+                // return submission created, but warn about attachments
+                return res.status(201).json({ message: 'Submission created, but failed to save attachments', submission_id: submissionId, activity_id: activityId, student_id: studentId });
+              }
+
+              return res.status(201).json({ message: 'Submission submitted successfully', submission_id: submissionId, activity_id: activityId, student_id: studentId });
+            });
+          } else {
+            // No attachments
+            return res.status(201).json({ message: 'Submission submitted successfully', submission_id: submissionId, activity_id: activityId, student_id: studentId });
+          }
+        });
       }
-
-      let isLate = 0;
-      try {
-        const cfg = JSON.parse(aRows[0].config_json || '{}');
-        if (cfg && cfg.due_date_time) {
-          const due = new Date(cfg.due_date_time);
-          const now = new Date();
-          if (now > due) isLate = 1;
-        }
-      } catch (parseErr) {
-        // ignore parse errors
-      }
-
-      // Now check for existing submission to support resubmission (update)
-      db.query(checkSql, [id, student_id], (cErr, cRows) => {
-        if (cErr) {
-          console.error('Failed to check existing submission:', cErr);
-          return res.status(500).json({ message: 'Failed to submit activity', error: cErr.message });
-        }
-
-        const files = req.files || [];
-
-        if (cRows && cRows.length > 0) {
-          // Update existing submission
-          const existingSubmissionId = cRows[0].submission_id;
-          const updateSql = `UPDATE activity_submissions SET submission_text = ?, checkpoint_data = ?, updated_at = NOW() WHERE submission_id = ?`;
-          db.query(updateSql, [submission_text || '', checkpoint_data || null, existingSubmissionId], (uErr, uRes) => {
-            if (uErr) {
-              console.error('Failed to update submission:', uErr);
-              return res.status(500).json({ message: 'Failed to submit activity', error: uErr.message });
-            }
-
-            // add any newly uploaded attachments (append to existing ones)
-            if (files.length > 0) {
-              const attachSql = `INSERT INTO activity_submission_attachments (submission_id, original_name, stored_name, file_path, mime_type, file_size, uploaded_at) VALUES ?`;
-              const values = files.map((f) => [existingSubmissionId, f.originalname, f.filename, `/uploads/activity_files/${f.filename}`, f.mimetype, f.size, new Date()]);
-              db.query(attachSql, [values], (aErr) => {
-                if (aErr) {
-                  console.error('Failed to save submission attachment metadata (on update):', aErr);
-                  return res.status(200).json({ message: 'Submission updated, but failed to save attachments', submission_id: existingSubmissionId, activity_id: id, student_id });
-                }
-                return res.status(200).json({ message: 'Submission updated successfully', submission_id: existingSubmissionId, activity_id: id, student_id });
-              });
-            } else {
-              return res.status(200).json({ message: 'Submission updated successfully', submission_id: existingSubmissionId, activity_id: id, student_id });
-            }
-          });
-        } else {
-          // Insert new submission record
-          const submissionSqlWithLate = `INSERT INTO activity_submissions (activity_id, student_id, submission_text, checkpoint_data, submitted_at)
-                           VALUES (?, ?, ?, ?, NOW())`;
-
-          db.query(submissionSqlWithLate, [id, student_id, submission_text || '', checkpoint_data || null], (err, result) => {
-            if (err) {
-              console.error('Failed to insert submission:', err);
-              return res.status(500).json({ message: 'Failed to submit activity', error: err.message });
-            }
-
-            const submissionId = result.insertId;
-
-            // If files were uploaded via multer, save their metadata in activity_submission_attachments
-            if (files.length > 0) {
-              const attachSql = `INSERT INTO activity_submission_attachments (submission_id, original_name, stored_name, file_path, mime_type, file_size, uploaded_at)
-                             VALUES ?`;
-              const values = files.map((f) => [submissionId, f.originalname, f.filename, `/uploads/activity_files/${f.filename}`, f.mimetype, f.size, new Date()]);
-
-              db.query(attachSql, [values], (aErr, aRes) => {
-                if (aErr) {
-                  console.error('Failed to save submission attachment metadata:', aErr);
-                  // return submission created, but warn about attachments
-                  return res.status(201).json({ message: 'Submission created, but failed to save attachments', submission_id: submissionId, activity_id: id, student_id });
-                }
-
-                return res.status(201).json({ message: 'Submission submitted successfully', submission_id: submissionId, activity_id: id, student_id });
-              });
-            } else {
-              // No attachments
-              return res.status(201).json({ message: 'Submission submitted successfully', submission_id: submissionId, activity_id: id, student_id });
-            }
-          });
-        }
-      });
     });
   } catch (error) {
-    console.error('Error in submitActivity:', error);
+    console.error('Error in handleRegularSubmission:', error);
     res.status(500).json({ message: "Failed to submit activity", error: error.message });
   }
 };
+
 
 // ✅ GET Submissions for an activity (Instructor view)
 exports.getActivitySubmissions = (req, res) => {
@@ -788,7 +908,7 @@ exports.getActivitySubmissions = (req, res) => {
         return res.status(403).json({ message: "Unauthorized: You are not the instructor for this activity" });
       }
 
-      // Fetch all submissions for this activity with student info
+      // Fetch all submissions for this activity with student info and dragdrop data
       const submissionSql = `
         SELECT 
           asu.submission_id,
@@ -799,14 +919,33 @@ exports.getActivitySubmissions = (req, res) => {
           asu.updated_at,
           asu.grade,
           asu.feedback,
+          asu.performance_score,
+          asu.performance_grade,
+          asu.performance_data,
+          asu.performance_report,
+          asu.checkpoint_data,
           u.username,
           u.email,
+          dd.overall_score,
+          dd.overall_percentage,
+          dd.letter_grade,
+          dd.completion_status,
+          dd.cpu_score,
+          dd.cmos_score,
+          dd.ram_score,
+          dd.total_wrong_attempts,
+          dd.total_correct_attempts,
+          dd.total_drag_operations,
+          dd.total_idle_seconds,
+          dd.sequence_followed,
+          dd.time_taken_seconds,
           COUNT(asaa.attachment_id) as attachment_count
         FROM activity_submissions asu
         LEFT JOIN users u ON asu.student_id = u.user_id
+        LEFT JOIN dragdrop_attempts dd ON asu.submission_id = dd.submission_id
         LEFT JOIN activity_submission_attachments asaa ON asu.submission_id = asaa.submission_id
         WHERE asu.activity_id = ?
-        GROUP BY asu.submission_id, asu.activity_id, asu.student_id, asu.submission_text, asu.submitted_at, asu.updated_at, asu.grade, asu.feedback, u.username, u.email
+        GROUP BY asu.submission_id, asu.activity_id, asu.student_id, asu.submission_text, asu.submitted_at, asu.updated_at, asu.grade, asu.feedback, asu.performance_score, asu.performance_grade, asu.performance_data, asu.performance_report, asu.checkpoint_data, u.username, u.email, dd.overall_score, dd.overall_percentage, dd.letter_grade, dd.completion_status, dd.cpu_score, dd.cmos_score, dd.ram_score, dd.total_wrong_attempts, dd.total_correct_attempts, dd.total_drag_operations, dd.total_idle_seconds, dd.sequence_followed, dd.time_taken_seconds
         ORDER BY asu.submitted_at DESC
       `;
 
@@ -815,6 +954,8 @@ exports.getActivitySubmissions = (req, res) => {
           console.error('Database error:', err);
           return res.status(500).json({ message: "Failed to fetch submissions", error: err.message });
         }
+
+        console.log('Raw submissions from DB:', JSON.stringify(submissions, null, 2));
 
         // For each submission, fetch the attachments
         if (submissions.length === 0) {
@@ -831,8 +972,27 @@ exports.getActivitySubmissions = (req, res) => {
           updated_at: sub.updated_at,
           grade: sub.grade,
           feedback: sub.feedback,
+          performance_score: sub.performance_score,
+          performance_grade: sub.performance_grade,
+          performance_data: sub.performance_data,
+          performance_report: sub.performance_report,
+          checkpoint_data: sub.checkpoint_data,
           username: sub.username,
           email: sub.email,
+          // Dragdrop attempt data
+          overall_score: sub.overall_score,
+          overall_percentage: sub.overall_percentage,
+          letter_grade: sub.letter_grade,
+          completion_status: sub.completion_status,
+          cpu_score: sub.cpu_score,
+          cmos_score: sub.cmos_score,
+          ram_score: sub.ram_score,
+          total_wrong_attempts: sub.total_wrong_attempts,
+          total_correct_attempts: sub.total_correct_attempts,
+          total_drag_operations: sub.total_drag_operations,
+          total_idle_seconds: sub.total_idle_seconds,
+          sequence_followed: sub.sequence_followed,
+          time_taken_seconds: sub.time_taken_seconds,
           attachments: []
         }));
 
@@ -995,6 +1155,26 @@ exports.saveCheckpoint = (req, res) => {
     const student_id = req.userId;
     const { component, progress, isCompleted, checkpointData, performanceData, performanceScore, performanceGrade, performanceReport } = req.body;
 
+    console.log('saveCheckpoint received:', {
+      id,
+      student_id,
+      performanceScore,
+      performanceGrade,
+      performanceData: performanceData ? 'provided' : 'null',
+      isCompleted,
+      performanceReportExists: !!performanceReport
+    });
+    
+    // Log the actual values
+    if (performanceReport) {
+      try {
+        const parsed = typeof performanceReport === 'string' ? JSON.parse(performanceReport) : performanceReport;
+        console.log('performanceReport contents:', parsed);
+      } catch (e) {
+        console.log('Could not parse performanceReport');
+      }
+    }
+
     if (!id || !student_id) {
       return res.status(400).json({ message: "Missing activity_id or student_id" });
     }
@@ -1031,6 +1211,15 @@ exports.saveCheckpoint = (req, res) => {
       if (cRows && cRows.length > 0) {
         // Update existing submission with checkpoint data and performance metrics
         const existingSubmissionId = cRows[0].submission_id;
+        
+        console.log('Updating existing submission:', {
+          submissionId: existingSubmissionId,
+          performanceScore,
+          performanceGrade,
+          performanceDataProvided: !!parsedPerformanceData,
+          performanceReportProvided: !!parsedPerformanceReport
+        });
+        
         const updateSql = `UPDATE activity_submissions 
           SET checkpoint_data = ?, 
               performance_data = ?, 
@@ -1054,6 +1243,13 @@ exports.saveCheckpoint = (req, res) => {
             console.error('Failed to update checkpoint:', uErr);
             return res.status(500).json({ message: 'Failed to save checkpoint', error: uErr.message });
           }
+          
+          console.log('Update successful. Affected rows:', uRes.affectedRows);
+          console.log('Update values used:', {
+            performance_score: performanceScore || null,
+            performance_grade: performanceGrade || null,
+            grade: performanceScore || null
+          });
 
           // Save to dragdrop_attempts table if performance data provided
           if (parsedPerformanceData && isCompleted) {
@@ -1072,6 +1268,15 @@ exports.saveCheckpoint = (req, res) => {
         });
       } else {
         // Insert new submission record with checkpoint data
+        console.log('Creating new submission with performance data:', {
+          activity_id: id,
+          student_id: student_id,
+          performanceScore,
+          performanceGrade,
+          performanceDataProvided: !!parsedPerformanceData,
+          performanceReportProvided: !!parsedPerformanceReport
+        });
+        
         const submissionSql = `INSERT INTO activity_submissions (activity_id, student_id, checkpoint_data, performance_data, performance_score, performance_grade, performance_report, grade, submitted_at)
                              VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())`;
 
@@ -1089,6 +1294,13 @@ exports.saveCheckpoint = (req, res) => {
             console.error('Failed to insert submission with checkpoint:', err);
             return res.status(500).json({ message: 'Failed to save checkpoint', error: err.message });
           }
+          
+          console.log('Insert successful. New submission_id:', result.insertId);
+          console.log('Insert values used:', {
+            performance_score: performanceScore || null,
+            performance_grade: performanceGrade || null,
+            grade: performanceScore || null
+          });
 
           const submissionId = result.insertId;
 
@@ -1118,6 +1330,15 @@ exports.saveCheckpoint = (req, res) => {
 // Helper: Save dragdrop attempt details to dragdrop_attempts table
 const saveDragdropAttempt = (activityId, studentId, submissionId, performanceData, performanceReport, overallScore, letterGrade) => {
   try {
+    console.log('saveDragdropAttempt called with:', {
+      activityId,
+      studentId,
+      submissionId,
+      overallScore,
+      letterGrade,
+      performanceDataExists: !!performanceData,
+      performanceReportExists: !!performanceReport
+    });
     const report = performanceReport || {};
     const metrics = performanceData.metrics || {};
     const componentScores = report.componentScores || {};
@@ -1147,7 +1368,7 @@ const saveDragdropAttempt = (activityId, studentId, submissionId, performanceDat
 
     const componentMetrics = metrics.components || {};
     
-    db.query(insertSql, [
+    const insertValues = [
       activityId,
       studentId,
       submissionId,
@@ -1173,7 +1394,16 @@ const saveDragdropAttempt = (activityId, studentId, submissionId, performanceDat
       componentMetrics.ram?.firstTrySuccess ? 1 : 0,
       JSON.stringify(performanceReport),
       JSON.stringify(metrics.eventLog || [])
-    ], (err, result) => {
+    ];
+
+    console.log('Inserting dragdrop_attempts with values:', {
+      overallScore: insertValues[4],
+      overallPercentage: insertValues[5],
+      letterGrade: insertValues[6],
+      report: report
+    });
+    
+    db.query(insertSql, insertValues, (err, result) => {
       if (err) {
         console.error('Failed to save dragdrop attempt:', err);
       } else {

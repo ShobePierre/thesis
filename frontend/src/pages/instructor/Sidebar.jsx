@@ -145,7 +145,7 @@ function Sidebar({ isOpen, onClose }) {
         }}
       >
         {/* Header Section */}
-        <div className="px-4 py-6 text-center border-b mt-10">
+        <div className="px-4 py-6 text-center border-b mt-20">
           <div className="flex items-center justify-center gap-2">
             <h2 className="text-2xl font-bold text-[#19A5EA]">{username}</h2>
           </div>

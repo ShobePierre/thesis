@@ -150,21 +150,39 @@ export default function CodeBlockActivityView({
     try {
       const token = localStorage.getItem("token");
 
-      await fetch("http://localhost:5000/api/activity/submission", {
+      // Prepare checkpoint data with validation results
+      const checkpointData = {
+        submissionType: "codeblock",
+        correct: validationFeedback?.correct || false,
+        score: validationFeedback?.score || 0,
+        attemptCount: attemptCount,
+        timeSpent: timeSpent,
+        errors: validationFeedback?.errors || [],
+        feedback: validationFeedback?.feedback || "",
+        analytics: validationFeedback?.analytics || {},
+      };
+
+      // Submit to backend using correct endpoint
+      const response = await fetch(`http://localhost:5000/api/activity/${activityId}/submission`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          activityId,
-          submissionType: "codeblock",
-          attemptCount,
-          timeSpent,
-          validationResult: validationFeedback,
+          submission_text: JSON.stringify(checkpointData),
+          checkpoint_data: JSON.stringify(checkpointData),
         }),
       });
 
+      if (!response.ok) {
+        throw new Error(`Submission failed with status ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("Submission successful:", result);
+
+      // Notify parent component
       if (onSubmit) {
         onSubmit({
           activityId,
@@ -172,10 +190,19 @@ export default function CodeBlockActivityView({
           score: validationFeedback?.score || 0,
           timeSpent,
           attempts: attemptCount,
+          submissionId: result.submission_id,
         });
+      }
+
+      // Show success message and disable further attempts if completed
+      if (validationFeedback?.correct) {
+        alert("🎉 Activity completed successfully! Your submission has been saved.");
+        // Optionally redirect or disable the activity
+        onExit?.();
       }
     } catch (error) {
       console.error("Error submitting activity:", error);
+      alert("❌ Failed to submit activity. Please try again.");
     } finally {
       setIsSubmitting(false);
     }

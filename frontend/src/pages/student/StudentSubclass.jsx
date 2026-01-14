@@ -30,6 +30,7 @@ function StudentSubclass() {
   const [submissionAttachments, setSubmissionAttachments] = useState([]);
   const [existingSubmissionAttachments, setExistingSubmissionAttachments] = useState([]);
   const [mySubmission, setMySubmission] = useState(null);
+  const [requestingNewAttempt, setRequestingNewAttempt] = useState(false);
   const [selectedActivityIsPastDue, setSelectedActivityIsPastDue] = useState(false);
   const [selectedActivityIsNotOpen, setSelectedActivityIsNotOpen] = useState(false);
   const [isSimPCOpen, setIsSimPCOpen] = useState(false);
@@ -506,6 +507,44 @@ function StudentSubclass() {
     alert("Edited image added to submission! You can now submit it with your response.");
   };
 
+  const handleRequestNewAttempt = async () => {
+    if (!selectedActivity) return;
+
+    const confirmed = window.confirm(
+      "Are you sure you want to request a new attempt? You will be able to submit again."
+    );
+
+    if (!confirmed) return;
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Session expired. Please log in again.");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      setRequestingNewAttempt(true);
+      await axios.post(
+        `${API_BASE_URL}/activity/${selectedActivity.activity_id}/request-attempt`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Clear the submission to allow new submission
+      setMySubmission(null);
+      setSubmissionText("");
+      setExistingSubmissionAttachments([]);
+      setSubmissionAttachments([]);
+      alert("New attempt requested! You can now submit again.");
+    } catch (error) {
+      console.error("Error requesting new attempt:", error);
+      alert(error.response?.data?.message || "Failed to request new attempt. Please try again.");
+    } finally {
+      setRequestingNewAttempt(false);
+    }
+  };
+
   const handleCopyCode = async () => {
     try {
       await navigator.clipboard.writeText(classInfo.code);
@@ -730,7 +769,24 @@ function StudentSubclass() {
 
                             <div className="flex flex-wrap gap-2 mt-3">
                               {['Sim Pc','Quiz','Code Block Activity','DIY Activity'].map((type)=> (
-                                <button key={type} onClick={() => openActivity(activity)} className={`px-3 py-1 rounded-full text-sm font-semibold border ${config.activity_name === type ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-200'}`}>
+                                <button 
+                                  key={type} 
+                                  onClick={() => {
+                                    if (!activity.my_submission) {
+                                      openActivity(activity);
+                                    }
+                                  }}
+                                  disabled={!!activity.my_submission}
+                                  className={`px-3 py-1 rounded-full text-sm font-semibold border transition ${
+                                    config.activity_name === type 
+                                      ? activity.my_submission
+                                        ? 'bg-gray-400 text-white border-gray-400 cursor-not-allowed opacity-60'
+                                        : 'bg-blue-600 text-white border-blue-600' 
+                                      : 'bg-white text-gray-700 border-gray-200'
+                                  }`}
+                                  title={activity.my_submission ? "Already submitted - request new attempt to modify" : ""}
+                                >
+                                  {config.activity_name === type && activity.my_submission && '✓ '}
                                   {type}
                                 </button>
                               ))}
@@ -870,18 +926,38 @@ function StudentSubclass() {
 
           {/* Activity Details Modal */}
           {selectedActivity && !isSimPCOpen && !isCodeLabOpen && !isCodeBlockOpen && !isQuizOpen && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-y-auto">
-              <div className="bg-white rounded-2xl w-full max-w-3xl mx-4 my-8 shadow-2xl">
-                {/* Header */}
-                <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
-                  <h2 className="text-2xl font-extrabold text-gray-800">{selectedActivity.title}</h2>
-                  <button onClick={() => setSelectedActivity(null)} className="text-gray-400 hover:text-gray-600 text-2xl">
-                    ×
-                  </button>
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 overflow-y-auto">
+              <div className="bg-white rounded-2xl w-full max-w-4xl mx-4 my-8 shadow-2xl">
+                {/* Enhanced Header */}
+                <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-500 flex items-center justify-between p-6 rounded-t-2xl z-10 shadow-md">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setSelectedActivity(null)}
+                      className="p-2 hover:bg-white/20 rounded-lg transition text-white"
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 19l-7-7 7-7"
+                        />
+                      </svg>
+                    </button>
+                    <h2 className="text-2xl font-bold text-white">{selectedActivity.title}</h2>
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-xs font-bold text-white bg-blue-400">
+                    📋 DETAILS
+                  </span>
                 </div>
 
                 {/* Content */}
-                <div className="p-6 space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto">
+                <div className="p-6 space-y-6 max-h-[calc(100vh-280px)] overflow-y-auto">
                   {(() => {
                     let cfg = selectedActivity.config_json;
                     if (typeof cfg === "string") {
@@ -894,145 +970,153 @@ function StudentSubclass() {
 
                     return (
                       <>
-                        {/* Activity Details */}
-                        <div className="space-y-4">
-                          <div>
-                            <h3 className="text-xl font-bold text-gray-800 mb-2">{selectedActivity.title}</h3>
-                            <div className="flex flex-wrap gap-2 mb-3">
-                              {["CodeLab", "Sim Pc", "Quiz", "Code Block Activity", "DIY Activity"].map((type) => (
-                                <button
-                                  key={type}
-                                  onClick={() => {
-                                    if (cfg.activity_name === type) {
-                                      if (type === "CodeLab") {
-                                        setIsCodeLabOpen(true);
-                                      } else if (type === "Sim Pc") {
-                                        setIsSimPCOpen(true);
-                                      } else if (type === "Code Block Activity") {
-                                        setIsCodeBlockOpen(true);
-                                      }
-                                    }
-                                  }}
-                                  className={`px-3 py-1 rounded-lg text-base font-bold cursor-pointer transition ${cfg.activity_name === type ? "bg-blue-600 text-white hover:bg-blue-700 shadow-md" : "bg-gray-100 text-gray-700 cursor-default"}`}
-                                >
-                                  {type}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-
-                          {/* Dates */}
-                          <div className="flex gap-6 text-base">
-                            {cfg.open_date_time && (
-                              <div>
-                                <p className="text-sm text-gray-500 mb-1 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4 text-black inline" fill="currentColor" aria-hidden="true"><path d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zM5 9h14v10H5z" /></svg> Opens</p>
-                                <p className="text-gray-800 font-medium">{new Date(cfg.open_date_time).toLocaleString()}</p>
-                              </div>
-                            )}
-                            {cfg.due_date_time && (
-                              <div>
-                                <p className="text-sm text-gray-500 mb-1 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4 text-black inline" fill="currentColor" aria-hidden="true"><path d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zM5 9h14v10H5z" /></svg> Due</p>
-                                <p className="text-gray-800 font-medium">{new Date(cfg.due_date_time).toLocaleString()}</p>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Instructions */}
-                          {cfg.instructions && (
+                        {/* Activity Info Card */}
+                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200 p-6 shadow-sm">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Activity Type */}
                             <div>
-                              <p className="text-base text-gray-600 whitespace-pre-line">{cfg.instructions}</p>
+                              <p className="text-xs font-bold text-gray-600 uppercase tracking-wide mb-3">📝 Activity Type</p>
+                              <div className="flex flex-wrap gap-2">
+                                {["Code Block Activity", "CodeLab", "Sim Pc", "Quiz", "DIY Activity"].map((type) => (
+                                  <button
+                                    key={type}
+                                    onClick={() => {
+                                      if (cfg.activity_name === type) {
+                                        if (type === "CodeLab") {
+                                          setIsCodeLabOpen(true);
+                                        } else if (type === "Sim Pc") {
+                                          setIsSimPCOpen(true);
+                                        } else if (type === "Code Block Activity") {
+                                          setIsCodeBlockOpen(true);
+                                        } else if (type === "Quiz") {
+                                          setIsQuizOpen(true);
+                                        }
+                                      }
+                                    }}
+                                    className={`px-3 py-1.5 rounded-full text-sm font-semibold transition transform ${cfg.activity_name === type ? "bg-blue-600 text-white shadow-md scale-105" : "bg-white text-gray-700 border border-gray-300 hover:border-blue-400"}`}
+                                  >
+                                    {type === "Code Block Activity" ? "📦" : type === "CodeLab" ? "💻" : type === "Sim Pc" ? "🖥️" : type === "Quiz" ? "❓" : "🔧"} {type}
+                                  </button>
+                                ))}
+                              </div>
                             </div>
-                          )}
 
-                          {/* Attachments */}
-                          {selectedActivity?.attachments && selectedActivity.attachments.length > 0 && (
-                            <div className="mt-6 pt-4 border-t border-gray-200">
-                              <h4 className="text-base font-bold text-gray-800 mb-3">Attachments</h4>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                {selectedActivity.attachments.map((att, idx) => {
-                                  let fileUrl = "#";
-                                  let downloadUrl = "#";
-                                  if (att.url && att.url.startsWith("http")) {
-                                    fileUrl = att.url;
-                                    downloadUrl = att.url;
-                                  } else if (att.file_path && typeof att.file_path === "string") {
-                                    if (att.file_path.startsWith("http")) {
-                                      fileUrl = att.file_path;
-                                      downloadUrl = att.file_path;
-                                    } else if (att.file_path.startsWith("/")) {
-                                      fileUrl = `${API_BASE_URL}${att.file_path}`;
-                                    } else {
-                                      fileUrl = `${API_BASE_URL}/${att.file_path}`;
-                                    }
-                                  } else if (att.stored_name) {
-                                    fileUrl = `${API_BASE_URL}/uploads/activity_files/${att.stored_name}`;
-                                    downloadUrl = `${API_BASE_URL}/activity/download/${encodeURIComponent(att.stored_name)}`;
+                            {/* Key Metrics */}
+                            <div className="grid grid-cols-2 gap-3">
+                              {cfg.open_date_time && (
+                                <div className="bg-white rounded-lg p-3 border border-blue-200">
+                                  <p className="text-xs font-bold text-gray-600 uppercase">🔓 Opens</p>
+                                  <p className="text-sm font-semibold text-blue-600 mt-1">{new Date(cfg.open_date_time).toLocaleDateString()}</p>
+                                  <p className="text-xs text-gray-500">{new Date(cfg.open_date_time).toLocaleTimeString()}</p>
+                                </div>
+                              )}
+                              {cfg.due_date_time && (
+                                <div className="bg-white rounded-lg p-3 border border-red-200">
+                                  <p className="text-xs font-bold text-gray-600 uppercase">⏱️ Due</p>
+                                  <p className="text-sm font-semibold text-red-600 mt-1">{new Date(cfg.due_date_time).toLocaleDateString()}</p>
+                                  <p className="text-xs text-gray-500">{new Date(cfg.due_date_time).toLocaleTimeString()}</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Instructions Card */}
+                        {cfg.instructions && (
+                          <div className="bg-white rounded-xl border-l-4 border-blue-500 p-6 shadow-sm hover:shadow-md transition">
+                            <h4 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                              <span>📖 Instructions</span>
+                            </h4>
+                            <p className="text-gray-700 text-base leading-relaxed whitespace-pre-line">{cfg.instructions}</p>
+                          </div>
+                        )}
+
+                        {/* Attachments Card */}
+                        {selectedActivity?.attachments && selectedActivity.attachments.length > 0 && (
+                          <div className="bg-white rounded-xl border-2 border-gray-200 p-6 shadow-sm hover:shadow-md transition">
+                            <h4 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                              <span>📎 Resources & Attachments</span>
+                              <span className="ml-auto px-2 py-1 rounded-full bg-gray-200 text-gray-700 text-sm font-semibold">{selectedActivity.attachments.length}</span>
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {selectedActivity.attachments.map((att, idx) => {
+                                let fileUrl = "#";
+                                let downloadUrl = "#";
+                                if (att.url && att.url.startsWith("http")) {
+                                  fileUrl = att.url;
+                                  downloadUrl = att.url;
+                                } else if (att.file_path && typeof att.file_path === "string") {
+                                  if (att.file_path.startsWith("http")) {
+                                    fileUrl = att.file_path;
+                                    downloadUrl = att.file_path;
+                                  } else if (att.file_path.startsWith("/")) {
+                                    fileUrl = `${API_BASE_URL}${att.file_path}`;
+                                  } else {
+                                    fileUrl = `${API_BASE_URL}/${att.file_path}`;
                                   }
-                                  if (!downloadUrl || downloadUrl === "#") {
-                                    if (att.stored_name) downloadUrl = `${API_BASE_URL}/activity/download/${encodeURIComponent(att.stored_name)}`;
-                                    else downloadUrl = fileUrl;
-                                  }
+                                } else if (att.stored_name) {
+                                  fileUrl = `${API_BASE_URL}/uploads/activity_files/${att.stored_name}`;
+                                  downloadUrl = `${API_BASE_URL}/activity/download/${encodeURIComponent(att.stored_name)}`;
+                                }
+                                if (!downloadUrl || downloadUrl === "#") {
+                                  if (att.stored_name) downloadUrl = `${API_BASE_URL}/activity/download/${encodeURIComponent(att.stored_name)}`;
+                                  else downloadUrl = fileUrl;
+                                }
 
-                                  const isImage = att.mime_type && att.mime_type.startsWith("image/");
-                                  const isVideo = att.mime_type && att.mime_type.startsWith("video/");
-                                  const isPdf = att.mime_type && att.mime_type.includes("pdf");
+                                const isImage = att.mime_type && att.mime_type.startsWith("image/");
+                                const isVideo = att.mime_type && att.mime_type.startsWith("video/");
+                                const isPdf = att.mime_type && att.mime_type.includes("pdf");
 
-
-                                  return (
-                                    <div key={att.id || idx} className="border rounded-lg p-3 bg-gray-50 flex items-center gap-3">
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          if (isImage || isVideo) {
-                                            setAttachmentPreview({ type: isImage ? "image" : "video", src: fileUrl, name: att.original_name || att.file_name });
-                                          } else {
-                                            window.open(downloadUrl, "_blank", "noopener");
-                                          }
-                                        }}
-                                        className="flex-shrink-0 rounded-md overflow-hidden"
-                                      >
-                                        {isImage ? (
-                                          <img src={fileUrl} alt={att.original_name || att.file_name} className="w-20 h-16 object-cover rounded-md" />
-                                        ) : isVideo ? (
-                                          <video src={fileUrl} className="w-20 h-16 object-cover rounded-md" />
-                                        ) : (
-                                          <div className="w-12 h-12 rounded-md bg-white flex items-center justify-center text-xl">{getAttachmentIcon(att.mime_type)}</div>
-                                        )}
-                                      </button>
-                                      <div className="flex-1 min-w-0">
-                                        <p className="text-base font-semibold text-gray-800 truncate">{att.original_name || att.file_name}</p>
-                                        <p className="text-sm text-gray-500">{att.mime_type || ""}</p>
+                                return (
+                                  <div key={att.id || idx} className="border-2 border-gray-200 rounded-lg p-4 bg-gray-50 hover:bg-white hover:shadow-md transition">
+                                    <div className="flex items-start gap-3 mb-3">
+                                      <div className="w-12 h-12 flex items-center justify-center bg-blue-100 rounded-lg font-bold text-blue-600 flex-shrink-0 text-lg">
+                                        {isImage ? "🖼️" : isVideo ? "🎬" : isPdf ? "📄" : "📎"}
                                       </div>
-                                      <div className="flex gap-2">
-                                        {(isImage || isPdf || isDocx) && (
-                                          <button
-                                            type="button"
-                                            onClick={() => {
-                                              setCanvasEditorData({
-                                                fileUrl,
-                                                mimeType: att.mime_type,
-                                                filename: att.original_name || att.file_name,
-                                              });
-                                              setCanvasEditorOpen(true);
-                                            }}
-                                            className="px-2 py-1 rounded bg-purple-100 text-purple-700 text-xs font-medium hover:bg-purple-200 transition"
-                                            title="Edit with canvas"
-                                          >
-                                            ✎ Edit
-                                          </button>
-                                        )}
-                                      <a href={downloadUrl} target="_blank" rel="noreferrer" download className="px-2 py-1 rounded bg-blue-100 text-blue-700 text-sm font-bold">
-                                      
-                                        Download
+                                      <div className="flex-1 min-w-0">
+                                        <p className="font-semibold text-gray-800 truncate">{att.original_name || att.file_name}</p>
+                                        <p className="text-xs text-gray-500">{att.mime_type || "Unknown"}</p>
+                                      </div>
+                                    </div>
+                                    <div className="flex gap-2">
+                                      {(isImage || isVideo) && (
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setAttachmentPreview({ type: isImage ? "image" : "video", src: fileUrl, name: att.original_name || att.file_name });
+                                          }}
+                                          className="flex-1 px-3 py-2 rounded-lg bg-purple-100 text-purple-700 text-xs font-bold hover:bg-purple-200 transition"
+                                        >
+                                          👁️ Preview
+                                        </button>
+                                      )}
+                                      {(isImage || isPdf) && (
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setCanvasEditorData({
+                                              fileUrl,
+                                              mimeType: att.mime_type,
+                                              filename: att.original_name || att.file_name,
+                                            });
+                                            setCanvasEditorOpen(true);
+                                          }}
+                                          className="flex-1 px-3 py-2 rounded-lg bg-orange-100 text-orange-700 text-xs font-bold hover:bg-orange-200 transition"
+                                          title="Edit with canvas"
+                                        >
+                                          ✏️ Annotate
+                                        </button>
+                                      )}
+                                      <a href={downloadUrl} target="_blank" rel="noreferrer" download className="flex-1 px-3 py-2 rounded-lg bg-blue-100 text-blue-700 text-xs font-bold hover:bg-blue-200 transition text-center">
+                                        ⬇️ Download
                                       </a>
                                     </div>
-                                    </div>
-                                  );
-                                })}
-                              </div>
+                                  </div>
+                                );
+                              })}
                             </div>
-                          )}
-                        </div>
+                          </div>
+                        )}
 
                         {/* Submission Form */}
                         <div className="pt-4 border-t border-gray-200">
@@ -1174,13 +1258,29 @@ function StudentSubclass() {
                   <button onClick={() => setSelectedActivity(null)} className="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-100 transition">
                     Close
                   </button>
-                  <button
-                    onClick={handleSubmitActivity}
-                    disabled={selectedActivityIsPastDue || selectedActivityIsNotOpen}
-                    className={`px-6 py-2 rounded-lg ${selectedActivityIsPastDue || selectedActivityIsNotOpen ? "bg-gray-300 text-gray-600 cursor-not-allowed" : "bg-blue-600 text-white hover:bg-blue-700"} font-medium transition`}
-                  >
-                    Submit
-                  </button>
+                  {mySubmission ? (
+                    // Show "Request New Attempt" button when submission exists
+                    <button
+                      onClick={handleRequestNewAttempt}
+                      disabled={requestingNewAttempt || selectedActivityIsPastDue}
+                      className={`px-6 py-2 rounded-lg font-medium transition ${
+                        requestingNewAttempt || selectedActivityIsPastDue
+                          ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                          : "bg-amber-500 text-white hover:bg-amber-600"
+                      }`}
+                    >
+                      {requestingNewAttempt ? "Requesting..." : "🔄 Request New Attempt"}
+                    </button>
+                  ) : (
+                    // Show "Submit" button when no submission exists
+                    <button
+                      onClick={handleSubmitActivity}
+                      disabled={selectedActivityIsPastDue || selectedActivityIsNotOpen}
+                      className={`px-6 py-2 rounded-lg ${selectedActivityIsPastDue || selectedActivityIsNotOpen ? "bg-gray-300 text-gray-600 cursor-not-allowed" : "bg-blue-600 text-white hover:bg-blue-700"} font-medium transition`}
+                    >
+                      Submit
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

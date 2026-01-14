@@ -460,6 +460,8 @@ exports.submitQuizAttempt = (req, res) => {
         }
 
         totalPoints = questions.reduce((sum, q) => sum + Number(q.points || 0), 0);
+        console.log('Quiz submission - Questions:', questions);
+        console.log('Quiz submission - Total Points calculated:', totalPoints);
 
         // Process each answer
         answers.forEach((answer, index) => {
@@ -552,6 +554,9 @@ exports.submitQuizAttempt = (req, res) => {
           const percentage = totalPoints > 0 ? (totalScore / totalPoints) * 100 : 0;
           const passed = percentage >= (attempt.passing_score || 60) ? 1 : 0;
           const timeTaken = Math.floor((Date.now() - new Date(attempt.started_at).getTime()) / 1000);
+
+          console.log('Quiz finalization - totalScore:', totalScore, 'totalPoints:', totalPoints, 'percentage:', percentage);
+          console.log('Quiz finalization - Rounding: ', Math.round(percentage * 100) / 100);
 
           const updateSql = `UPDATE quiz_attempts SET score = ?, percentage = ?, passed = ?, submitted_at = NOW(), time_taken_seconds = ?, is_completed = 1 WHERE attempt_id = ?`;
           db.query(updateSql, [totalScore, percentage, passed, timeTaken, attempt_id], (err) => {
@@ -796,6 +801,60 @@ exports.deleteQuiz = (req, res) => {
     });
   } catch (error) {
     console.error('Error in deleteQuiz:', error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// ✅ GET attempt details for instructor grading (no student_id check)
+exports.getAttemptDetailsForInstructor = (req, res) => {
+  try {
+    const attempt_id = req.params.attemptId;
+    const instructor_id = req.userId;
+
+    if (!attempt_id) {
+      return res.status(400).json({ message: "Attempt ID is required" });
+    }
+
+    // Get attempt info - verify instructor owns the quiz
+    const sql = `SELECT qa.* FROM quiz_attempts qa
+                 JOIN users u ON qa.student_id = u.user_id
+                 JOIN quizzes q ON qa.quiz_id = q.quiz_id
+                 WHERE qa.attempt_id = ? AND q.instructor_id = ?`;
+
+    db.query(sql, [attempt_id, instructor_id], (err, rows) => {
+      if (err || !rows || rows.length === 0) {
+        console.error('Error fetching attempt:', err);
+        return res.status(403).json({ message: "Attempt not found or unauthorized" });
+      }
+
+      const attempt = rows[0];
+      console.log('Attempt data for instructor - Full row:', JSON.stringify(attempt, null, 2));
+      console.log('Score field:', attempt.score);
+      console.log('Percentage field:', attempt.percentage);
+
+      // Get attempt answers
+      const ansSql = `SELECT qaa.*, q.question_text, q.question_type, q.points FROM quiz_attempt_answers qaa
+                      JOIN quiz_questions q ON qaa.question_id = q.question_id
+                      WHERE qaa.attempt_id = ?
+                      ORDER BY q.\`order\``;
+
+      db.query(ansSql, [attempt_id], (aErr, answers) => {
+        if (aErr) {
+          console.error('Error fetching answers:', aErr);
+          answers = [];
+        }
+
+        console.log('Returning attempt with score:', attempt.score, 'percentage:', attempt.percentage);
+        res.json({
+          attempt: {
+            ...attempt,
+            answers: answers || []
+          }
+        });
+      });
+    });
+  } catch (error) {
+    console.error('Error in getAttemptDetailsForInstructor:', error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };

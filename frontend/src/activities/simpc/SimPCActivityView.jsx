@@ -185,6 +185,32 @@ class PerformanceTracker {
   calculateOverallScore() {
     const { weights } = GRADING_CONFIG;
     
+    // Check if all components are completed - if yes, award high score
+    const completedCount = Object.values(this.metrics.components)
+      .filter(c => c.completed).length;
+    const totalComponents = Object.keys(this.metrics.components).length;
+    const allCompleted = completedCount === totalComponents;
+
+    console.log("=== CALCULATING OVERALL SCORE ===");
+    console.log("Completed Components:", completedCount, "of", totalComponents);
+    console.log("All Completed:", allCompleted);
+
+    if (allCompleted) {
+      // All components completed successfully = 100%
+      // Deduct points only if sequence was not followed or major issues detected
+      let score = 100;
+      
+      // Only deduct if sequence was NOT followed correctly
+      if (!this.metrics.overall.sequenceFollowed) {
+        score -= 5;
+        console.log("- 5% deduction for incorrect sequence");
+      }
+      
+      console.log("Final Score (completion-based):", score);
+      return Math.max(0, Math.min(100, score)); // Return between 0-100
+    }
+
+    // If not all completed, use weighted calculation
     // Accuracy score (0-100)
     const totalAttempts = this.metrics.overall.totalCorrectAttempts + 
                           this.metrics.overall.totalWrongAttempts;
@@ -192,19 +218,26 @@ class PerformanceTracker {
       ? (this.metrics.overall.totalCorrectAttempts / totalAttempts) * 100 
       : 0;
     
+    console.log("Accuracy Score:", accuracyScore);
+    console.log("  - Total Attempts:", totalAttempts);
+    console.log("  - Correct:", this.metrics.overall.totalCorrectAttempts);
+    
     // Efficiency score (0-100)
     const componentScores = Object.keys(this.metrics.components).map(name => 
       this.calculateComponentScore(name)
     );
     const efficiencyScore = componentScores.reduce((a, b) => a + b, 0) / componentScores.length;
     
+    console.log("Efficiency Score:", efficiencyScore);
+    console.log("Component Scores:", componentScores);
+    
     // Process score (0-100)
     const processScore = this.metrics.overall.sequenceFollowed ? 100 : 70;
+    console.log("Process Score:", processScore, "(Sequence:", this.metrics.overall.sequenceFollowed, ")");
     
     // Completion score (0-100)
-    const completedCount = Object.values(this.metrics.components)
-      .filter(c => c.completed).length;
-    const completionScore = (completedCount / Object.keys(this.metrics.components).length) * 100;
+    const completionScore = (completedCount / totalComponents) * 100;
+    console.log("Completion Score:", completionScore);
     
     // Weighted total
     const totalScore = 
@@ -212,6 +245,10 @@ class PerformanceTracker {
       (efficiencyScore * weights.efficiency) +
       (processScore * weights.process) +
       (completionScore * weights.completion);
+    
+    console.log("Weighted Total:", totalScore);
+    console.log("Weights:", weights);
+    console.log("=====================================");
     
     return Math.round(totalScore);
   }
@@ -232,6 +269,14 @@ class PerformanceTracker {
   generateReport() {
     const overallScore = this.calculateOverallScore();
     const letterGrade = this.getLetterGrade();
+    
+    // Log for debugging
+    console.log("=== GRADING REPORT GENERATED ===");
+    console.log("Overall Score:", overallScore);
+    console.log("Letter Grade:", letterGrade);
+    console.log("Metrics.overall:", this.metrics.overall);
+    console.log("Metrics.components:", this.metrics.components);
+    console.log("=====================================");
     
     return {
       overallScore,
@@ -534,7 +579,7 @@ export default function SimPCActivityView({ activity, onBack, onSubmit }) {
       setSubmissionStatus('uploading');
       setSubmissionMessage('Uploading submission to server...');
       
-      const API_BASE_URL = "http://localhost:5000";
+      const API_BASE_URL = "http://localhost:5000/api";
       const response = await axios.post(
         `${API_BASE_URL}/activity/${activity.activity_id}/submission`,
         formData,

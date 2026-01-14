@@ -32,5 +32,6 @@ router.get('/:id/score', verifyToken, quizController.getStudentScore);      // G
 
 // ✅ QUIZ ATTEMPTS - Instructor
 router.get('/:id/attempts', verifyToken, quizController.getQuizAttempts);   // Get all attempts for a quiz
+router.get('/instructor/attempts/:attemptId', verifyToken, quizController.getAttemptDetailsForInstructor); // Get specific attempt details for instructor grading
 
 module.exports = router;
