@@ -704,6 +704,7 @@
   font-size: 1rem;
   margin-bottom: 1.5rem;
   transition: all 0.3s ease;
+  color: #000;
 }
 
 .dashboard-modal-input::placeholder {

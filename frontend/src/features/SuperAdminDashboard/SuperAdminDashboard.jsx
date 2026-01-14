@@ -184,6 +184,11 @@ function UserManagement({ onStatsUpdate }) {
 
   useEffect(() => {
     fetchUsers();
+    // Refresh users list every 30 seconds to show updates from other sources (e.g., student profile changes)
+    const interval = setInterval(() => {
+      fetchUsers();
+    }, 30000);
+    return () => clearInterval(interval);
   }, [search, roleFilter]);
 
   const fetchUsers = async () => {
