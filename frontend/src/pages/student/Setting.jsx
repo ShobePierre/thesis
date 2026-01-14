@@ -12,6 +12,8 @@ function Setting() {
   const [message, setMessage] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
+  const [messages, setMessages] = useState([]);
+  const [loadingMessages, setLoadingMessages] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -90,6 +92,54 @@ function Setting() {
       return { submissions: true };
     }
   });
+
+  // Fetch messages when messages tab is active
+  useEffect(() => {
+    if (active === 'messages') {
+      fetchMessages();
+    }
+  }, [active]);
+
+  const fetchMessages = async () => {
+    setLoadingMessages(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API_BASE_URL}/user/messages`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setMessages(response.data.messages || []);
+    } catch (err) {
+      console.error('Error fetching messages:', err);
+    } finally {
+      setLoadingMessages(false);
+    }
+  };
+
+  const markMessageAsRead = async (messageId) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.put(`${API_BASE_URL}/user/messages/${messageId}/read`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setMessages(messages.map(m => 
+        m.message_id === messageId ? { ...m, is_read: 1 } : m
+      ));
+    } catch (err) {
+      console.error('Error marking message as read:', err);
+    }
+  };
+
+  const deleteMessage = async (messageId) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${API_BASE_URL}/user/messages/${messageId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setMessages(messages.filter(m => m.message_id !== messageId));
+    } catch (err) {
+      console.error('Error deleting message:', err);
+    }
+  };
 
   const onSaveAll = async () => {
     localStorage.setItem("student_profile", JSON.stringify(profileSettings));
@@ -189,10 +239,10 @@ function Setting() {
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#cfe3fa] via-[#e6f0ff] to-white">
       <Header onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} onLogout={handleLogout} />
 
-      <div className="flex flex-1">
+      <div className="flex flex-1 md:ml-72">
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-        <main className="flex-grow p-6 md:p-20 md:ml-24 relative">
+        <main className="flex-grow p-6 md:p-20 relative w-full">
           <h1 className="text-3xl font-bold text-gray-800 mb-6 text-left drop-shadow-sm">Settings</h1>
 
           <div className="w-full max-w-6xl mx-4 md:mx-0 bg-white/90 border border-gray-200 rounded-3xl shadow-xl p-4 md:p-8 grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -205,6 +255,11 @@ function Setting() {
               <button onClick={() => setActive('notifications')} className={`w-full text-left p-3 rounded-lg transition ${active === 'notifications' ? 'bg-gradient-to-r from-indigo-50 to-indigo-100 ring-1 ring-indigo-200' : 'hover:bg-gray-50'}`}>
                 <div className="text-sm font-semibold text-gray-900">Notifications</div>
                 <div className="text-xs text-gray-500 mt-1">Alerts & preferences</div>
+              </button>
+
+              <button onClick={() => setActive('messages')} className={`w-full text-left p-3 rounded-lg transition ${active === 'messages' ? 'bg-gradient-to-r from-purple-50 to-purple-100 ring-1 ring-purple-200' : 'hover:bg-gray-50'}`}>
+                <div className="text-sm font-semibold text-gray-900">Messages</div>
+                <div className="text-xs text-gray-500 mt-1">Admin messages</div>
               </button>
             </nav>
 
@@ -224,6 +279,10 @@ function Setting() {
 
                 {active === 'notifications' && (
                   <StudentNotificationsForm value={notificationPrefs} onChange={setNotificationPrefs} />
+                )}
+
+                {active === 'messages' && (
+                  <StudentMessagesTab messages={messages} loading={loadingMessages} onMarkAsRead={markMessageAsRead} onDelete={deleteMessage} />
                 )}
 
                 <div className="mt-6 flex items-center justify-end gap-3">
@@ -324,6 +383,106 @@ function StudentNotificationsForm({ value, onChange }) {
       {/* Announcements notification removed per UI requirement */}
 
       {/* System alerts removed per request */}
+    </div>
+  );
+}
+function StudentMessagesTab({ messages, loading, onMarkAsRead, onDelete }) {
+  const [expandedMessage, setExpandedMessage] = useState(null);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <span className="ml-3 text-gray-500 font-medium">Loading messages...</span>
+      </div>
+    );
+  }
+
+  if (!messages || messages.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12">
+        <svg className="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+        <p className="text-gray-500 font-medium text-lg">No messages</p>
+        <p className="text-gray-400 text-sm">You don't have any messages from administrators yet</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {messages.map((msg) => (
+        <div
+          key={msg.message_id}
+          className={`border rounded-lg overflow-hidden transition ${
+            msg.is_read
+              ? 'bg-gray-50 border-gray-200'
+              : 'bg-blue-50 border-blue-300 shadow-sm'
+          }`}
+        >
+          <button
+            onClick={() => {
+              setExpandedMessage(expandedMessage === msg.message_id ? null : msg.message_id);
+              if (!msg.is_read) {
+                onMarkAsRead(msg.message_id);
+              }
+            }}
+            className="w-full p-4 text-left hover:bg-gray-100 transition"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex-grow">
+                <div className="flex items-center gap-2">
+                  <h3 className={`font-semibold ${msg.is_read ? 'text-gray-700' : 'text-blue-900'}`}>
+                    {msg.title}
+                  </h3>
+                  {!msg.is_read && (
+                    <span className="inline-block w-2 h-2 bg-blue-600 rounded-full"></span>
+                  )}
+                </div>
+                <p className="text-sm text-gray-600 mt-1">
+                  From: <span className="font-medium">{msg.admin_username}</span>
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {new Date(msg.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </p>
+              </div>
+              <svg
+                className={`w-5 h-5 text-gray-400 transition transform ${
+                  expandedMessage === msg.message_id ? 'rotate-180' : ''
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
+            </div>
+          </button>
+
+          {expandedMessage === msg.message_id && (
+            <div className="border-t border-gray-200 bg-white px-4 py-4">
+              <div className="prose prose-sm max-w-none mb-4 text-gray-700 whitespace-pre-wrap">
+                {msg.content}
+              </div>
+              <div className="flex gap-2 justify-end">
+                <button
+                  onClick={() => onDelete(msg.message_id)}
+                  className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition font-medium text-sm"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   );
 }

@@ -5,6 +5,7 @@ const fs = require('fs');
 const multer = require('multer');
 const db = require('../config/db');
 const userModel = require('../models/user.models');
+const messageController = require('../controllers/message.controller');
 const { verifyToken } = require('../middlewares/auth.middleware');
 
 // Ensure avatars upload directory exists
@@ -164,3 +165,17 @@ router.put('/me', verifyToken, (req, res) => {
     });
   });
 });
+// ==================== ADMIN MESSAGES ====================
+// Get all messages for the logged-in user
+router.get('/messages', verifyToken, messageController.getUserMessages);
+
+// Get unread message count
+router.get('/messages/unread-count', verifyToken, messageController.getUnreadMessageCount);
+
+// Mark a message as read
+router.put('/messages/:messageId/read', verifyToken, messageController.markMessageAsRead);
+
+// Delete a message
+router.delete('/messages/:messageId', verifyToken, messageController.deleteMessage);
+
+module.exports = router;

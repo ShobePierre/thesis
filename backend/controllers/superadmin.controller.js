@@ -208,6 +208,42 @@ exports.deleteUser = (req, res) => {
   });
 };
 
+exports.toggleUserLock = (req, res) => {
+  const { userId } = req.params;
+  const { isLocked, reason } = req.body;
+
+  // Prevent locking own account
+  if (parseInt(userId) === req.userId) {
+    return res.status(400).send({ message: 'Cannot lock/unlock your own account' });
+  }
+
+  const lockedAt = isLocked ? new Date() : null;
+  const lockedReason = isLocked ? (reason || 'Account restricted by admin') : null;
+
+  const query = 'UPDATE users SET is_locked = ?, locked_at = ?, locked_reason = ? WHERE user_id = ?';
+  db.query(query, [isLocked ? 1 : 0, lockedAt, lockedReason, userId], (err, results) => {
+    if (err) {
+      console.error('Lock user error:', err);
+      return res.status(500).send({ message: 'Error updating user lock status' });
+    }
+
+    if (results.affectedRows === 0) {
+      return res.status(404).send({ message: 'User not found' });
+    }
+
+    if (req.auditData) {
+      req.auditData.entity_id = parseInt(userId);
+      req.auditData.action = isLocked ? 'lock_user' : 'unlock_user';
+    }
+
+    res.send({ 
+      message: isLocked ? 'User account locked successfully' : 'User account unlocked successfully',
+      user_id: parseInt(userId),
+      is_locked: isLocked
+    });
+  });
+};
+
 // ==================== SUBMISSIONS MANAGEMENT ====================
 
 exports.getAllSubmissions = (req, res) => {

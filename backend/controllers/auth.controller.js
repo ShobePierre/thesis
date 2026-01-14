@@ -57,6 +57,15 @@ exports.login = (req, res) => {
       return res.status(400).send({ message: 'User not found' });
 
     const user = result[0];
+
+    // Check if user account is locked
+    if (user.is_locked) {
+      return res.status(403).send({ 
+        message: 'Account is locked. Contact administrator for access.',
+        reason: user.locked_reason || 'No reason provided'
+      });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).send({ message: 'Invalid Credentials' });
 

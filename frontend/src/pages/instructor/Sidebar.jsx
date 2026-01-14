@@ -137,11 +137,11 @@ function Sidebar({ isOpen, onClose }) {
         className={`bg-[#F6F8FA] border-r shadow-lg transition-all duration-300 ease-in-out ${
           isOpen
             ? "fixed top-0 left-0 z-50 w-72 h-screen"
-            : "hidden md:flex md:sticky md:top-16 md:h-[calc(100vh-4rem)] md:w-72 md:flex-col"
+            : "hidden md:flex md:fixed md:left-0 md:top-16 md:h-[calc(100vh-4rem)] md:w-72 md:flex-col md:flex-shrink-0"
         }`}
         style={{
           // ensure the aside sits above background layers when sticky
-          zIndex: isOpen ? 9999 : undefined,
+          zIndex: isOpen ? 9999 : 40,
         }}
       >
         {/* Header Section */}
@@ -175,7 +175,7 @@ function Sidebar({ isOpen, onClose }) {
         </div>
 
         {/* Menu Items */}
-        <div className="flex flex-col p-4 space-y-4 flex-1">
+        <div className="flex flex-col p-4 space-y-4 flex-1 overflow-y-auto">
           {links.map((link) => {
             const isActive = location.pathname === link.path;
             return (

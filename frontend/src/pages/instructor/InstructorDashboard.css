@@ -10,9 +10,12 @@
 
 .instructor-dashboard-container {
   position: relative;
-  min-height: 100vh;
-  overflow-x: hidden;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  display: flex;
+  flex-direction: column;
 }
 
 /* Animated Background Blobs */
@@ -73,6 +76,7 @@
   height: 100%;
   position: relative;
   z-index: 1;
+  overflow: hidden;
 }
 
 /* Main Content */
@@ -84,8 +88,17 @@
   flex-direction: column;
   width: 100%;
   height: 100%;
-  overflow-y: auto;
+  overflow-x: hidden;
   padding-top: 100px;
+  padding-left: 0;
+}
+
+/* Add left margin on desktop when sidebar is visible */
+@media (min-width: 768px) {
+  .instructor-dashboard-main {
+    margin-left: 0;
+    padding-left: 2rem;
+  }
 }
 
 /* Header Section */
@@ -446,12 +459,14 @@
   }
 
   .dashboard-main-wrapper {
-    flex-direction: column;
+    flex-direction: row;
     height: auto;
   }
 
   .instructor-dashboard-main {
     height: auto;
+    margin-left: 0;
+    padding-left: 1.5rem;
   }
 
   .instructor-dashboard-blob {
@@ -473,6 +488,19 @@
 
   .instructor-dashboard-section-title {
     font-size: 1.25rem;
+  }
+}
+
+/* Desktop layout with fixed sidebar */
+@media (min-width: 768px) {
+  .dashboard-main-wrapper {
+    margin-left: 288px;
+    width: calc(100% - 288px);
+  }
+
+  /* Fix SubClass layout to prevent sidebar overlap */
+  main[class*="flex-1"] {
+    margin-left: 0;
   }
 }
 
