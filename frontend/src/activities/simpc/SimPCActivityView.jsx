@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import axios from "axios";
 import PhaserSimulator from "../../features/DragDrop/components/PhaserSimulator";
+import SimPCLecture from "./SimPCLecture";
 
 // ============================================
 // GRADING CONFIGURATION
@@ -401,10 +402,12 @@ class PerformanceTracker {
 // MAIN COMPONENT
 // ============================================
 export default function SimPCActivityView({ activity, onBack, onSubmit }) {
+  const [showLecture, setShowLecture] = useState(true);
   const [isCompleted, setIsCompleted] = useState(false);
   const [completionTime, setCompletionTime] = useState(0);
   const [startTime] = useState(new Date());
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentComponent, setCurrentComponent] = useState(null);
   const [checkpoints, setCheckpoints] = useState({
     cpu: { completed: false, progress: 0, timestamp: null },
     cmos: { completed: false, progress: 0, timestamp: null },
@@ -622,6 +625,7 @@ export default function SimPCActivityView({ activity, onBack, onSubmit }) {
 
   // Track component interactions
   const handleComponentStarted = useCallback((componentName) => {
+    setCurrentComponent(componentName);
     trackerRef.current.componentStarted(componentName);
   }, []);
 
@@ -629,50 +633,87 @@ export default function SimPCActivityView({ activity, onBack, onSubmit }) {
     trackerRef.current.dragOperation(componentName, isCorrect);
   }, []);
 
+  // Show lecture modal first if needed
+  if (showLecture) {
+    return <SimPCLecture activity={activity} onStart={() => setShowLecture(false)} />;
+  }
+
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-gray-900 w-screen h-screen">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-gray-800 to-gray-900 text-white px-4 py-3 border-b border-gray-700 flex justify-between items-center z-10">
-        <div className="flex-1 min-w-0 flex items-center gap-6">
-          <div>
-            <h2 className="text-lg font-bold truncate">{activity.title || "PC Building Simulator"}</h2>
-            {activity.instructions && (
-              <p className="text-xs text-gray-300 mt-0.5 line-clamp-1">
-                {activity.instructions}
-              </p>
-            )}
-          </div>
-          
-          {/* Progress Bar */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold whitespace-nowrap">{overallProgress.toFixed(0)}%</span>
-            <div className="w-32 h-2 bg-gray-700 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-blue-600 transition-all duration-300"
-                style={{ width: `${overallProgress}%` }}
-              />
+    <div className="fixed inset-0 z-50 flex flex-col bg-gradient-to-br from-gray-950 via-gray-900 to-blue-950 w-screen h-screen">
+      {/* Animated Background Elements */}
+      <div className="absolute top-0 left-0 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl animate-pulse"></div>
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+      
+      {/* Premium Header with All Info */}
+      <div className="relative bg-gradient-to-r from-blue-900 via-purple-900 to-indigo-900 text-white px-6 py-5 border-b border-blue-700/50 z-10 shadow-2xl backdrop-blur-sm">
+        <div className="flex items-center justify-between gap-6 flex-wrap">
+          {/* Left: Title & Task Status */}
+          <div className="flex items-center gap-4 flex-1 min-w-0">
+            <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg">
+              <span className="text-xl">🖥️</span>
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-lg font-bold truncate bg-clip-text text-transparent bg-gradient-to-r from-blue-200 to-purple-200">
+                {activity.title || "PC Building Simulator"}
+              </h2>
+              {currentComponent && !showLecture ? (
+                <p className="text-xs text-yellow-300 font-semibold mt-0.5">
+                  ⚡ Working on: <span className="uppercase">{currentComponent}</span>
+                </p>
+              ) : (
+                activity.instructions && (
+                  <p className="text-xs text-blue-100/70 mt-0.5 line-clamp-1">
+                    {activity.instructions}
+                  </p>
+                )
+              )}
             </div>
           </div>
 
-          {/* Components Checklist */}
-          <div className="flex gap-4 text-xs text-gray-300 border-l border-gray-700 pl-4">
-            {Object.entries(checkpoints).map(([name, data]) => (
-              <div key={name} className="flex items-center gap-1 uppercase">
-                <span className={`w-4 h-4 flex items-center justify-center rounded text-xs font-bold ${
-                  data.completed ? 'bg-green-600 text-white' : 'bg-gray-700 text-gray-400'
-                }`}>
-                  {data.completed ? '✓' : '○'}
-                </span>
-                <span>{name}</span>
-              </div>
-            ))}
+          {/* Center: Progress Bar */}
+          <div className="flex items-center gap-3 px-5 py-2 bg-black/30 rounded-lg border border-blue-600/30">
+            <span className="text-sm font-bold text-blue-300 whitespace-nowrap">{overallProgress.toFixed(0)}%</span>
+            <div className="w-32 h-2.5 bg-gray-700/50 rounded-full overflow-hidden border border-blue-600/30">
+              <div
+                className="h-full bg-gradient-to-r from-emerald-400 to-cyan-500 transition-all duration-300 shadow-lg shadow-emerald-500/50"
+                style={{ width: `${overallProgress}%` }}
+              />
+            </div>
+            <div className="text-xs font-semibold text-blue-300 whitespace-nowrap">
+              {Object.keys(checkpoints).filter(k => checkpoints[k].completed).length}/3
+            </div>
           </div>
-        </div>
 
-        {/* Timer */}
-        <div className="text-right ml-3 flex-shrink-0">
-          <div className="text-2xl font-mono font-bold text-blue-400">{formatTime(completionTime)}</div>
-          <div className="text-xs text-gray-400">Elapsed</div>
+          {/* Right: Component Status & Timer */}
+          <div className="flex items-center gap-3">
+            {/* Component Status */}
+            <div className="hidden sm:flex gap-2 px-3 py-1.5 bg-black/30 rounded-lg border border-blue-600/30">
+              {Object.entries(checkpoints).map(([name]) => (
+                <div key={name} className="flex items-center gap-1">
+                  <span className={`w-4 h-4 flex items-center justify-center rounded-full text-xs font-bold transition-all ${
+                    checkpoints[name].completed ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg' : 'bg-gray-700/50 text-gray-400'
+                  }`}>
+                    {checkpoints[name].completed ? '✓' : '○'}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Timer */}
+            <div className="text-center px-4 py-2 bg-gradient-to-br from-cyan-600 to-blue-600 rounded-lg border border-cyan-500/50 shadow-lg shadow-cyan-500/30">
+              <div className="text-lg font-mono font-bold text-cyan-100">{formatTime(completionTime)}</div>
+              <div className="text-xs font-semibold text-cyan-200">Time</div>
+            </div>
+            
+            {/* Exit Button */}
+            <button
+              onClick={onBack}
+              className="p-2 rounded-lg bg-red-600/20 hover:bg-red-600/40 border border-red-600/50 hover:border-red-500 text-red-300 hover:text-red-200 transition-all duration-200 transform hover:scale-110 active:scale-95 font-bold text-base"
+              title="Exit Activity"
+            >
+              ✕
+            </button>
+          </div>
         </div>
       </div>
 
@@ -687,68 +728,69 @@ export default function SimPCActivityView({ activity, onBack, onSubmit }) {
 
         {/* Submission Loading Overlay */}
         {isSubmitting && submissionStatus && (
-          <div className="absolute inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-8 max-w-md w-full shadow-2xl text-center">
+          <div className="absolute inset-0 bg-gradient-to-br from-black/95 via-blue-900/50 to-black/95 backdrop-blur-xl flex items-center justify-center z-50 p-4 flex flex-col justify-center">
+            <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl p-8 max-w-md w-full shadow-2xl border border-gray-700/50 text-center">
               {/* Loading Spinner */}
               {submissionStatus !== 'error' && submissionStatus !== 'success' && (
-                <div className="mb-6 flex justify-center">
-                  <div className="relative w-16 h-16">
-                    <div className="absolute inset-0 rounded-full border-4 border-gray-200"></div>
-                    <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-blue-600 border-r-blue-600 animate-spin"></div>
+                <div className="mb-8 flex justify-center">
+                  <div className="relative w-20 h-20">
+                    <div className="absolute inset-0 rounded-full border-4 border-gray-700/50"></div>
+                    <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-blue-500 border-r-purple-500 animate-spin"></div>
                   </div>
                 </div>
               )}
               
               {/* Success Icon */}
               {submissionStatus === 'success' && (
-                <div className="mb-6 flex justify-center text-5xl animate-bounce">
-                  ✅
+                <div className="mb-8 flex justify-center">
+                  <div className="text-6xl animate-bounce">✅</div>
                 </div>
               )}
               
               {/* Error Icon */}
               {submissionStatus === 'error' && (
-                <div className="mb-6 flex justify-center text-5xl">
-                  ⚠️
+                <div className="mb-8 flex justify-center">
+                  <div className="text-6xl animate-pulse">⚠️</div>
                 </div>
               )}
               
               {/* Status Message */}
-              <h3 className={`text-lg font-semibold mb-2 ${
-                submissionStatus === 'error' ? 'text-red-600' :
-                submissionStatus === 'success' ? 'text-green-600' :
-                'text-gray-800'
+              <h3 className={`text-2xl font-bold mb-3 ${
+                submissionStatus === 'error' ? 'text-red-400' :
+                submissionStatus === 'success' ? 'text-green-400' :
+                'text-blue-300'
               }`}>
-                {submissionStatus === 'preparing' && 'Preparing Submission'}
-                {submissionStatus === 'uploading' && 'Uploading Data'}
-                {submissionStatus === 'processing' && 'Processing'}
-                {submissionStatus === 'success' && 'Submission Successful'}
-                {submissionStatus === 'error' && 'Submission Failed'}
+                {submissionStatus === 'preparing' && '📦 Preparing Submission'}
+                {submissionStatus === 'uploading' && '📤 Uploading Data'}
+                {submissionStatus === 'processing' && '⚙️ Processing'}
+                {submissionStatus === 'success' && '🎉 Submission Successful'}
+                {submissionStatus === 'error' && '❌ Submission Failed'}
               </h3>
               
               {/* Detail Message */}
-              <p className={`text-sm mb-4 ${
-                submissionStatus === 'error' ? 'text-red-500' :
-                submissionStatus === 'success' ? 'text-green-600' :
-                'text-gray-600'
+              <p className={`text-sm mb-6 ${
+                submissionStatus === 'error' ? 'text-red-300' :
+                submissionStatus === 'success' ? 'text-green-300' :
+                'text-gray-300'
               }`}>
                 {submissionMessage}
               </p>
               
               {/* Progress Indicator */}
               {submissionStatus !== 'error' && submissionStatus !== 'success' && (
-                <div className="space-y-2">
-                  <div className="flex gap-1 justify-center">
-                    <div className={`h-1 w-8 rounded-full transition-all ${
-                      submissionStatus === 'preparing' ? 'bg-blue-600' : 'bg-gray-300'
+                <div className="space-y-3">
+                  <div className="flex gap-2 justify-center">
+                    <div className={`h-2 w-10 rounded-full transition-all ${
+                      submissionStatus === 'preparing' ? 'bg-gradient-to-r from-blue-500 to-purple-500 shadow-lg shadow-blue-500/50' : 'bg-gray-700/50'
                     }`}></div>
-                    <div className={`h-1 w-8 rounded-full transition-all ${
-                      submissionStatus === 'uploading' ? 'bg-blue-600' : 'bg-gray-300'
+                    <div className={`h-2 w-10 rounded-full transition-all ${
+                      submissionStatus === 'uploading' ? 'bg-gradient-to-r from-blue-500 to-purple-500 shadow-lg shadow-blue-500/50' : 'bg-gray-700/50'
                     }`}></div>
-                    <div className={`h-1 w-8 rounded-full transition-all ${
-                      submissionStatus === 'processing' ? 'bg-blue-600' : 'bg-gray-300'
+                    <div className={`h-2 w-10 rounded-full transition-all ${
+                      submissionStatus === 'processing' ? 'bg-gradient-to-r from-blue-500 to-purple-500 shadow-lg shadow-blue-500/50' : 'bg-gray-700/50'
                     }`}></div>
                   </div>
+                  <p className="text-xs text-gray-400 font-medium">Please wait...</p>
                 </div>
               )}
               
@@ -760,9 +802,9 @@ export default function SimPCActivityView({ activity, onBack, onSubmit }) {
                     setSubmissionMessage('');
                     handleCompleteActivity();
                   }}
-                  className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-sm"
+                  className="w-full mt-6 px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white rounded-lg transition font-bold text-sm shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
                 >
-                  Retry Submission
+                  🔄 Retry Submission
                 </button>
               )}
             </div>
@@ -771,96 +813,99 @@ export default function SimPCActivityView({ activity, onBack, onSubmit }) {
 
         {/* Performance Report Overlay */}
         {showReport && performanceReport && !submissionStatus && (
-          <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-8 max-w-2xl w-full shadow-2xl animate-in fade-in zoom-in duration-300 max-h-[90vh] overflow-y-auto">
+          <div className="absolute inset-0 bg-gradient-to-br from-black/95 via-blue-900/50 to-black/95 backdrop-blur-xl flex items-center justify-center z-50 p-4">
+            <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl p-8 max-w-2xl w-full shadow-2xl border border-gray-700/50 animate-in fade-in zoom-in duration-300 max-h-[90vh] overflow-y-auto">
               {/* Header */}
-              <div className="text-center mb-6">
-                <div className="mb-4 text-6xl">
+              <div className="text-center mb-8">
+                <div className="mb-4 text-7xl animate-bounce">
                   {performanceReport.letterGrade === 'A' && '🏆'}
                   {performanceReport.letterGrade === 'B' && '⭐'}
                   {performanceReport.letterGrade === 'C' && '👍'}
                   {performanceReport.letterGrade === 'D' && '📚'}
                   {performanceReport.letterGrade === 'F' && '💪'}
                 </div>
-                <h3 className="text-3xl font-bold text-gray-800 mb-2">Activity Completed!</h3>
-                <div className="flex items-center justify-center gap-4 mb-4">
-                  <div className="text-5xl font-bold text-blue-600">{performanceReport.overallScore}</div>
+                <h3 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-purple-300 mb-4">Activity Completed!</h3>
+                <div className="flex items-center justify-center gap-6 mb-6 p-6 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-xl border border-blue-600/30">
+                  <div className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">{performanceReport.overallScore}</div>
                   <div className="text-left">
-                    <div className="text-2xl font-bold text-gray-700">/ 100</div>
-                    <div className="text-lg font-semibold text-blue-600">Grade: {performanceReport.letterGrade}</div>
+                    <div className="text-2xl font-bold text-blue-200">/ 100</div>
+                    <div className="text-lg font-bold text-purple-300 mt-1">Grade: <span className="text-yellow-300">{performanceReport.letterGrade}</span></div>
                   </div>
                 </div>
-                <p className="text-gray-600">Time Taken: {formatTime(completionTime)}</p>
+                <p className="text-blue-300 font-semibold">⏱️ Time Taken: {formatTime(completionTime)}</p>
               </div>
 
               {/* Component Scores */}
-              <div className="mb-6">
-                <h4 className="font-semibold text-gray-800 mb-3">Component Performance</h4>
-                <div className="space-y-2">
+              <div className="mb-8">
+                <h4 className="font-bold text-blue-300 mb-4 flex items-center gap-2">
+                  <span>📊</span> Component Performance
+                </h4>
+                <div className="space-y-3">
                   {Object.entries(performanceReport.componentScores).map(([name, score]) => (
-                    <div key={name} className="flex items-center gap-3">
-                      <span className="text-sm font-medium text-gray-700 uppercase w-16">{name}</span>
-                      <div className="flex-1 h-6 bg-gray-200 rounded-full overflow-hidden">
+                    <div key={name} className="flex items-center gap-4">
+                      <span className="text-sm font-bold text-gray-300 uppercase w-16">{name}</span>
+                      <div className="flex-1 h-6 bg-gray-700/50 rounded-full overflow-hidden border border-gray-600/30">
                         <div
                           className={`h-full transition-all duration-500 ${
-                            score >= 90 ? 'bg-green-500' :
-                            score >= 80 ? 'bg-blue-500' :
-                            score >= 70 ? 'bg-yellow-500' : 'bg-red-500'
+                            score >= 90 ? 'bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg shadow-green-500/50' :
+                            score >= 80 ? 'bg-gradient-to-r from-blue-500 to-cyan-500 shadow-lg shadow-blue-500/50' :
+                            score >= 70 ? 'bg-gradient-to-r from-yellow-500 to-orange-500 shadow-lg shadow-yellow-500/50' : 
+                            'bg-gradient-to-r from-red-500 to-pink-500 shadow-lg shadow-red-500/50'
                           }`}
                           style={{ width: `${score}%` }}
                         />
                       </div>
-                      <span className="text-sm font-bold text-gray-700 w-12 text-right">{score}/100</span>
+                      <span className="text-sm font-bold text-gray-300 w-12 text-right">{score}%</span>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Accuracy Stats */}
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <div className="text-sm text-gray-600 mb-1">Accuracy Rate</div>
-                  <div className="text-2xl font-bold text-green-600">
+              <div className="grid grid-cols-2 gap-4 mb-8">
+                <div className="bg-gradient-to-br from-green-900/40 to-emerald-900/40 p-4 rounded-lg border border-green-600/30">
+                  <div className="text-sm text-green-300 mb-2 font-semibold">✓ Accuracy Rate</div>
+                  <div className="text-3xl font-bold text-green-300">
                     {performanceReport.accuracy.accuracyRate.toFixed(1)}%
                   </div>
-                  <div className="text-xs text-gray-500 mt-1">
+                  <div className="text-xs text-green-400/70 mt-1">
                     {performanceReport.accuracy.correctAttempts} correct / {performanceReport.accuracy.totalAttempts} total
                   </div>
                 </div>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <div className="text-sm text-gray-600 mb-1">Wrong Attempts</div>
-                  <div className="text-2xl font-bold text-red-600">
+                <div className="bg-gradient-to-br from-red-900/40 to-pink-900/40 p-4 rounded-lg border border-red-600/30">
+                  <div className="text-sm text-red-300 mb-2 font-semibold">⚠️ Wrong Attempts</div>
+                  <div className="text-3xl font-bold text-red-300">
                     {performanceReport.accuracy.wrongAttempts}
                   </div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    Mistakes made
+                  <div className="text-xs text-red-400/70 mt-1">
+                    Mistakes to learn from
                   </div>
                 </div>
               </div>
 
               {/* Strengths & Improvements */}
-              <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="grid grid-cols-2 gap-4 mb-8">
                 <div>
-                  <h4 className="font-semibold text-green-700 mb-2 flex items-center gap-1">
-                    <span>✓</span> Strengths
+                  <h4 className="font-bold text-green-300 mb-3 flex items-center gap-2">
+                    <span>🌟</span> Strengths
                   </h4>
-                  <ul className="text-sm text-gray-700 space-y-1">
+                  <ul className="text-sm text-gray-300 space-y-2">
                     {performanceReport.strengths.map((strength, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
-                        <span className="text-green-600 mt-0.5">•</span>
+                      <li key={idx} className="flex items-start gap-2 p-2 bg-green-900/20 rounded border border-green-600/30">
+                        <span className="text-green-400 mt-0.5 font-bold">✓</span>
                         <span>{strength}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-blue-700 mb-2 flex items-center gap-1">
+                  <h4 className="font-bold text-orange-300 mb-3 flex items-center gap-2">
                     <span>📈</span> Areas to Improve
                   </h4>
-                  <ul className="text-sm text-gray-700 space-y-1">
+                  <ul className="text-sm text-gray-300 space-y-2">
                     {performanceReport.improvements.map((improvement, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
-                        <span className="text-blue-600 mt-0.5">•</span>
+                      <li key={idx} className="flex items-start gap-2 p-2 bg-orange-900/20 rounded border border-orange-600/30">
+                        <span className="text-orange-400 mt-0.5 font-bold">→</span>
                         <span>{improvement}</span>
                       </li>
                     ))}
@@ -869,9 +914,9 @@ export default function SimPCActivityView({ activity, onBack, onSubmit }) {
               </div>
 
               {/* Footer */}
-              <div className="text-center pt-4 border-t border-gray-200">
-                <p className="text-gray-500 text-sm mb-3">Your submission has been recorded successfully.</p>
-                <div className="inline-block px-6 py-2 bg-blue-600 text-white rounded-lg font-medium">
+              <div className="text-center pt-6 border-t border-gray-700/50">
+                <p className="text-gray-400 text-sm mb-4 font-medium">✓ Your submission has been recorded successfully.</p>
+                <div className="inline-block px-6 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-bold shadow-lg shadow-green-500/50 animate-pulse">
                   Redirecting in 5 seconds...
                 </div>
               </div>
@@ -880,25 +925,25 @@ export default function SimPCActivityView({ activity, onBack, onSubmit }) {
         )}
       </div>
 
-      {/* Footer */}
-      <div className="bg-gray-800 text-white px-4 py-2 border-t border-gray-700 flex justify-end gap-2 z-40">
+      {/* Premium Footer */}
+      <div className="bg-gradient-to-r from-gray-800/80 to-gray-900/80 backdrop-blur-sm text-white px-6 py-4 border-t border-gray-700/50 flex justify-end gap-3 z-40 shadow-2xl">
         <button
           onClick={onBack}
           disabled={isSubmitting}
-          className="px-3 py-1 bg-gray-600 text-white rounded text-sm hover:bg-gray-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2.5 bg-gradient-to-r from-red-600/20 to-red-700/20 hover:from-red-600/40 hover:to-red-700/40 border border-red-600/50 text-red-300 hover:text-red-200 rounded-lg text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95"
         >
-          Exit
+          Exit Activity
         </button>
         <button
           onClick={handleCompleteActivity}
           disabled={isCompleted || isSubmitting || overallProgress < 100}
-          className={`px-4 py-1 rounded text-sm font-medium transition ${
+          className={`px-6 py-2.5 rounded-lg text-sm font-bold transition-all transform ${
             isCompleted || isSubmitting || overallProgress < 100
-              ? "bg-green-600 text-white cursor-not-allowed opacity-50"
-              : "bg-blue-600 text-white hover:bg-blue-700"
+              ? "bg-green-600/40 text-green-300 border border-green-600/50 cursor-not-allowed opacity-60"
+              : "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 border border-blue-500/50"
           }`}
         >
-          {isSubmitting ? "Submitting..." : isCompleted ? "✓ Submitted" : "Submit Activity"}
+          {isSubmitting ? "⏳ Submitting..." : isCompleted ? "✓ Submitted" : "🚀 Submit Activity"}
         </button>
       </div>
     </div>
