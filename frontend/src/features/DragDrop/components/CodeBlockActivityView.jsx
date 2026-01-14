@@ -50,6 +50,7 @@ export default function CodeBlockActivityView({
       language: activityData?.language || "python",
       code: activityData?.code || "",
       hiddenBlockIds: activityData?.hiddenBlockIds || [],
+      correctBlockOrder: activityData?.correctBlockOrder || [],
       checkpointId: activityId,
     };
 
@@ -219,25 +220,37 @@ export default function CodeBlockActivityView({
 
   return (
     <div className="codeblock-activity-view">
-      {/* Header with activity info */}
+      {/* Enhanced Header */}
       <div className="activity-header">
-        <div className="activity-info">
-          <h2>{activityData?.title || "Code Block Activity"}</h2>
-          <p>{activityData?.description || "Drag blocks to complete the code"}</p>
+        <div className="header-left">
+          <div className="activity-icon">🧩</div>
+          <div className="activity-info">
+            <h2>{activityData?.title || "Code Block Activity"}</h2>
+            <p>{activityData?.description || "Arrange code blocks in the correct order"}</p>
+          </div>
         </div>
 
         <div className="activity-stats">
-          <div className="stat-item">
-            <span className="stat-label">Language</span>
-            <span className="stat-value">{activityData?.language?.toUpperCase()}</span>
+          <div className="stat-card">
+            <span className="stat-icon">📝</span>
+            <div className="stat-content">
+              <span className="stat-label">Language</span>
+              <span className="stat-value">{activityData?.language?.toUpperCase() || 'UNKNOWN'}</span>
+            </div>
           </div>
-          <div className="stat-item">
-            <span className="stat-label">Time</span>
-            <span className="stat-value">{formatTime(timeSpent)}</span>
+          <div className="stat-card">
+            <span className="stat-icon">⏱️</span>
+            <div className="stat-content">
+              <span className="stat-label">Time</span>
+              <span className="stat-value">{formatTime(timeSpent)}</span>
+            </div>
           </div>
-          <div className="stat-item">
-            <span className="stat-label">Attempts</span>
-            <span className="stat-value">{attemptCount}</span>
+          <div className="stat-card">
+            <span className="stat-icon">🔄</span>
+            <div className="stat-content">
+              <span className="stat-label">Attempts</span>
+              <span className="stat-value">{attemptCount}</span>
+            </div>
           </div>
         </div>
 
@@ -250,61 +263,106 @@ export default function CodeBlockActivityView({
         </button>
       </div>
 
-      {/* Phaser game container - SCROLLABLE */}
+      {/* Game Container */}
       <div className="game-container">
         <div ref={containerRef} className="phaser-game" />
       </div>
 
-      {/* Validation feedback overlay */}
+      {/* Enhanced Validation Feedback */}
       {validationFeedback && (
         <div className={`validation-feedback ${validationFeedback.correct ? 'success' : 'error'}`}>
-          <div className="feedback-content">
-            <h3>{validationFeedback.correct ? '✓ Correct!' : '✗ Incorrect'}</h3>
-            <p>{validationFeedback.feedback}</p>
-            {validationFeedback.errors && validationFeedback.errors.length > 0 && (
-              <ul className="error-list">
-                {validationFeedback.errors.slice(0, 3).map((error, idx) => (
-                  <li key={idx}>{error}</li>
-                ))}
-              </ul>
-            )}
-            <div className="feedback-score">
-              Score: <strong>{validationFeedback.score}/100</strong>
+          <div className="feedback-backdrop" onClick={() => setValidationFeedback(null)}></div>
+          <div className="feedback-card">
+            <div className="feedback-header">
+              <div className="feedback-icon">
+                {validationFeedback.correct ? '✅' : '❌'}
+              </div>
+              <div className="feedback-title-section">
+                <h3>{validationFeedback.correct ? 'Perfect! ✓' : 'Not Quite Right'}</h3>
+                <p className="feedback-subtitle">
+                  {validationFeedback.correct 
+                    ? 'Your solution is correct!' 
+                    : 'Review the errors below and try again'}
+                </p>
+              </div>
+            </div>
+
+            <div className="feedback-body">
+              <p className="feedback-message">{validationFeedback.feedback}</p>
+
+              {validationFeedback.errors && validationFeedback.errors.length > 0 && (
+                <div className="error-details">
+                  <h4>Details:</h4>
+                  <ul className="error-list">
+                    {validationFeedback.errors.slice(0, 3).map((error, idx) => (
+                      <li key={idx} className="error-item">
+                        <span className="error-position">Position {error.position || idx + 1}</span>
+                        <span className="error-message">{error.message || error}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  {validationFeedback.errors.length > 3 && (
+                    <p className="error-more">+{validationFeedback.errors.length - 3} more errors</p>
+                  )}
+                </div>
+              )}
+
+              <div className="score-display">
+                <div className="score-circle">
+                  <div className="score-value">{Math.round(validationFeedback.score)}</div>
+                  <div className="score-label">%</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="feedback-footer">
+              <button 
+                className="btn btn-tertiary" 
+                onClick={() => setValidationFeedback(null)}
+              >
+                Try Again
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Bottom action bar */}
+      {/* Enhanced Footer */}
       <div className="activity-footer">
+        <div className="footer-left">
+          <div className="progress-info">
+            {!validationFeedback?.correct ? (
+              <div className="info-badge working">
+                <span className="badge-icon">⚡</span>
+                <span className="badge-text">Validate your code to check if it's correct</span>
+              </div>
+            ) : (
+              <div className="info-badge success">
+                <span className="badge-icon">🎯</span>
+                <span className="badge-text">Solution is correct! Ready to submit.</span>
+              </div>
+            )}
+          </div>
+        </div>
+
         <div className="footer-actions">
           <button
             className="btn btn-secondary"
             onClick={onExit}
+            title="Exit without submitting"
           >
-            Exit Activity
+            ← Exit
           </button>
 
           <button
             className="btn btn-primary"
             onClick={handleSubmit}
             disabled={!validationFeedback?.correct || isSubmitting}
+            title={!validationFeedback?.correct ? 'Validate your solution first' : 'Submit your solution'}
           >
-            {isSubmitting ? "Submitting..." : "Submit Solution"}
+            {isSubmitting ? '⏳ Submitting...' : '✓ Submit Solution'}
           </button>
         </div>
-
-        {!validationFeedback?.correct && (
-          <div className="help-text">
-            Validate your code to check if it's correct, then submit when ready.
-          </div>
-        )}
-
-        {validationFeedback?.correct && (
-          <div className="success-text">
-            Great! Your solution is correct. Click "Submit Solution" to save your progress.
-          </div>
-        )}
       </div>
     </div>
   );

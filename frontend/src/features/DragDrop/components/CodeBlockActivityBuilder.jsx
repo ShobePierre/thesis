@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { CodeBlockParser, createSampleCodeBlocks } from "../utils/codeBlockParser";
+import AnswerSequenceEditor from "./AnswerSequenceEditor";
 import "./CodeBlockActivityBuilder.css";
 
 /**
@@ -12,6 +13,7 @@ export default function CodeBlockActivityBuilder({ activityId, onSave, initialDa
   const [code, setCode] = useState("");
   const [blocks, setBlocks] = useState([]);
   const [hiddenBlockIds, setHiddenBlockIds] = useState([]);
+  const [correctBlockOrder, setCorrectBlockOrder] = useState([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [difficulty, setDifficulty] = useState("easy");
@@ -32,6 +34,7 @@ export default function CodeBlockActivityBuilder({ activityId, onSave, initialDa
       setDescription(initialData.description || "");
       setDifficulty(initialData.difficulty || "easy");
       setHiddenBlockIds(initialData.hiddenBlockIds || []);
+      setCorrectBlockOrder(initialData.correctBlockOrder || []);
       setHints(initialData.hints || {});
       parseCodeBlocks(initialData.code, initialData.language);
     }
@@ -140,6 +143,16 @@ System.out.println(z);`,
       return;
     }
 
+    if (correctBlockOrder.length === 0) {
+      setParseError("Please set the correct answer sequence before saving");
+      return;
+    }
+
+    if (correctBlockOrder.length !== hiddenBlockIds.length) {
+      setParseError("All hidden blocks must be included in the correct sequence");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -151,6 +164,7 @@ System.out.println(z);`,
         code,
         blocks,
         hiddenBlockIds,
+        correctBlockOrder,
         difficulty,
         hints,
         type: "codeblock",
@@ -187,92 +201,110 @@ System.out.println(z);`,
 
   return (
     <div className="code-block-builder">
-      <div className="builder-header">
-        <h2>Code Block Activity Builder</h2>
-        <p>Create interactive code-block drag-and-drop challenges</p>
-      </div>
-
-      <div className="builder-container">
-        {/* Left Panel - Code Input */}
-        <div className="builder-section input-section">
-          <h3>Source Code</h3>
-
-          <div className="form-group">
-            <label>Activity Title</label>
-            <input
-              type="text"
-              placeholder="e.g., Complete the variable assignment"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="input-field"
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Description</label>
-            <textarea
-              placeholder="Describe what students need to do..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="textarea-field"
-              rows={3}
-            />
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label>Programming Language</label>
-              <select value={language} onChange={handleLanguageChange} className="select-field">
-                <option value="python">Python</option>
-                <option value="javascript">JavaScript</option>
-                <option value="java">Java</option>
-                <option value="cpp">C++</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label>Difficulty Level</label>
-              <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)} className="select-field">
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard</option>
-              </select>
+      <div className="builder-wrapper">
+        {/* Animated Header */}
+        <div className="builder-header">
+          <div className="header-content">
+            <div className="header-icon">🧩</div>
+            <div className="header-text">
+              <h1>Code Block Activity Builder</h1>
+              <p>Create interactive drag-and-drop coding challenges for your students</p>
             </div>
           </div>
-
-          <div className="form-group">
-            <label>Code</label>
-            <div className="code-input-wrapper">
-              <textarea
-                value={code}
-                onChange={handleCodeChange}
-                placeholder="Paste or write your code here..."
-                className="code-input"
-                spellCheck="false"
-              />
-              <button className="btn-secondary" onClick={loadSampleCode}>
-                Load Sample
-              </button>
-            </div>
+          <div className="progress-bar">
+            <div className="progress-fill" style={{width: `${Math.min(100, (title && code && hiddenBlockIds.length > 0 && correctBlockOrder.length > 0 ? 100 : 50))}%`}}></div>
           </div>
-
-          {parseError && <div className="error-message">{parseError}</div>}
-          {successMessage && <div className="success-message">{successMessage}</div>}
         </div>
 
-        {/* Right Panel - Block Configuration */}
-        <div className="builder-section config-section">
-          <h3>Code Blocks</h3>
-
-          {blocks.length === 0 ? (
-            <div className="empty-state">
-              <p>Enter code to see blocks</p>
+        {/* Main Content Grid */}
+        <div className="builder-content">
+          {/* Left Panel - Code Input */}
+          <div className="builder-panel input-panel">
+            <div className="panel-header">
+              <span className="step-number">1</span>
+              <h2>Activity Details</h2>
             </div>
-          ) : (
-            <div className="blocks-list">
-              {blocks.map((block) => (
-                <div key={block.id} className="block-item">
-                  <div className="block-header">
+
+            <div className="form-group">
+              <label>Activity Title *</label>
+              <input
+                type="text"
+                placeholder="e.g., Complete the Loop Function"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="input-field"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Description</label>
+              <textarea
+                placeholder="Describe what students need to accomplish..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="textarea-field"
+                rows={3}
+              />
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>Language *</label>
+                <select value={language} onChange={handleLanguageChange} className="select-field">
+                  <option value="python">🐍 Python</option>
+                  <option value="javascript">📜 JavaScript</option>
+                  <option value="java">☕ Java</option>
+                  <option value="cpp">⚙️ C++</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Difficulty *</label>
+                <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)} className="select-field difficulty-select">
+                  <option value="easy">🟢 Easy</option>
+                  <option value="medium">🟡 Medium</option>
+                  <option value="hard">🔴 Hard</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>Source Code *</label>
+              <div className="code-input-wrapper">
+                <textarea
+                  value={code}
+                  onChange={handleCodeChange}
+                  placeholder="Paste your code here..."
+                  className="code-input"
+                  spellCheck="false"
+                />
+                <button className="btn-helper" onClick={loadSampleCode}>
+                  📋 Load Sample
+                </button>
+              </div>
+            </div>
+
+            {parseError && <div className="alert alert-error">⚠️ {parseError}</div>}
+            {successMessage && <div className="alert alert-success">✓ {successMessage}</div>}
+          </div>
+
+          {/* Middle Panel - Block Configuration */}
+          <div className="builder-panel config-panel">
+            <div className="panel-header">
+              <span className="step-number">2</span>
+              <h2>Select Hidden Blocks</h2>
+            </div>
+
+            {blocks.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-icon">📝</div>
+                <p>Enter code to see code blocks</p>
+              </div>
+            ) : (
+              <div className="blocks-list">
+                {blocks.map((block, idx) => (
+                  <div key={block.id} className={`block-item ${hiddenBlockIds.includes(block.id) ? 'hidden' : ''}`}>
+                    <div className="block-index">{idx + 1}</div>
                     <label className="block-checkbox">
                       <input
                         type="checkbox"
@@ -281,71 +313,130 @@ System.out.println(z);`,
                       />
                       <span className="checkmark"></span>
                     </label>
-                    <div className="block-content">
-                      <code className={`block-code block-type-${block.type.toLowerCase()}`}>
-                        {block.content}
-                      </code>
+                    <div className="block-details">
+                      <code className="block-code">{block.content}</code>
                       <span className="block-type">{block.type}</span>
                     </div>
                   </div>
+                ))}
+              </div>
+            )}
 
-                  {hiddenBlockIds.includes(block.id) && (
-                    <div className="block-hint">
-                      <input
-                        type="text"
-                        placeholder="Add a hint for this block..."
-                        value={hints[block.id] || ""}
-                        onChange={(e) => updateBlockHint(block.id, e.target.value)}
-                        className="hint-input"
-                      />
-                    </div>
-                  )}
+            <div className="blocks-stats">
+              <div className="stat">
+                <span className="stat-icon">📦</span>
+                <div>
+                  <div className="stat-value">{blocks.length}</div>
+                  <div className="stat-label">Total Blocks</div>
                 </div>
-              ))}
+              </div>
+              <div className="stat">
+                <span className="stat-icon">🔒</span>
+                <div>
+                  <div className="stat-value">{hiddenBlockIds.length}</div>
+                  <div className="stat-label">Hidden</div>
+                </div>
+              </div>
+            </div>
+
+            {hiddenBlockIds.length > 0 && (
+              <div className="hints-section">
+                <h3>Hints for Hidden Blocks</h3>
+                {blocks.filter(b => hiddenBlockIds.includes(b.id)).map((block) => (
+                  <div key={block.id} className="hint-item">
+                    <code className="hint-code">{block.content}</code>
+                    <input
+                      type="text"
+                      placeholder="Add a helpful hint..."
+                      value={hints[block.id] || ""}
+                      onChange={(e) => updateBlockHint(block.id, e.target.value)}
+                      className="hint-input"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Right Panel - Answer Sequence */}
+          {hiddenBlockIds.length > 0 && (
+            <div className="builder-panel answer-panel">
+              <div className="panel-header">
+                <span className="step-number">3</span>
+                <h2>Correct Sequence</h2>
+              </div>
+              <p className="panel-description">Drag hidden blocks in the correct order:</p>
+              <AnswerSequenceEditor 
+                blocks={blocks}
+                hiddenBlockIds={hiddenBlockIds}
+                initialSequence={correctBlockOrder}
+                onSequenceSet={setCorrectBlockOrder}
+              />
             </div>
           )}
-
-          <div className="blocks-stats">
-            <p>Total Blocks: <strong>{blocks.length}</strong></p>
-            <p>Hidden Blocks: <strong>{hiddenBlockIds.length}</strong></p>
-          </div>
         </div>
-      </div>
 
-      {/* Bottom Actions */}
-      <div className="builder-actions">
-        <button className="btn-primary" onClick={handleSave} disabled={loading}>
-          {loading ? "Saving..." : "Save Activity"}
-        </button>
-        <button
-          className="btn-secondary"
-          onClick={() => setShowPreview(!showPreview)}
-          disabled={blocks.length === 0}
-        >
-          {showPreview ? "Hide Preview" : "Preview"}
-        </button>
-      </div>
-
-      {/* Preview Section */}
-      {showPreview && blocks.length > 0 && (
-        <div className="preview-section">
-          <h3>Preview</h3>
-          <div className="preview-container">
-            <h4>{title || "Untitled Activity"}</h4>
-            <p>{description || "No description provided"}</p>
-            <div className="preview-blocks">
-              <h5>Code to Complete:</h5>
-              <pre className="preview-code">
-                {blocks
-                  .map((block) =>
-                    hiddenBlockIds.includes(block.id) ? "?" : block.content
-                  )
-                  .join(" ")}
-              </pre>
+        {/* Bottom Actions */}
+        <div className="builder-footer">
+          <div className="footer-info">
+            <div className="info-item">
+              <span className="info-icon">✅</span>
+              <span className="info-text">Title: {title ? '✓' : '✗'}</span>
+            </div>
+            <div className="info-item">
+              <span className="info-icon">✅</span>
+              <span className="info-text">Code: {code ? '✓' : '✗'}</span>
+            </div>
+            <div className="info-item">
+              <span className="info-icon">✅</span>
+              <span className="info-text">Blocks Hidden: {hiddenBlockIds.length > 0 ? '✓' : '✗'}</span>
+            </div>
+            <div className="info-item">
+              <span className="info-icon">✅</span>
+              <span className="info-text">Sequence Set: {correctBlockOrder.length > 0 ? '✓' : '✗'}</span>
             </div>
           </div>
+
+          <div className="footer-actions">
+            <button
+              className="btn btn-secondary"
+              onClick={() => setShowPreview(!showPreview)}
+              disabled={blocks.length === 0}
+            >
+              {showPreview ? '👁️ Hide Preview' : '👁️ Preview'}
+            </button>
+            <button className="btn btn-primary" onClick={handleSave} disabled={loading}>
+              {loading ? '⏳ Saving...' : '💾 Save Activity'}
+            </button>
+          </div>
         </div>
-      )}
+
+        {/* Preview Section */}
+        {showPreview && blocks.length > 0 && (
+          <div className="preview-section">
+            <div className="preview-header">
+              <h3>📊 Student Preview</h3>
+              <button onClick={() => setShowPreview(false)} className="btn-close">✕</button>
+            </div>
+            <div className="preview-container">
+              <div className="preview-item">
+                <h4>{title || 'Untitled Activity'}</h4>
+                <p>{description || 'No description'}</p>
+              </div>
+              <div className="preview-item">
+                <h5>Code to Complete:</h5>
+                <pre className="preview-code">
+                  {blocks
+                    .map((block) =>
+                      hiddenBlockIds.includes(block.id) ? '[ ? ]' : block.content
+                    )
+                    .join('\n')}
+                </pre>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

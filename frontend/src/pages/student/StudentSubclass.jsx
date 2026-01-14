@@ -577,14 +577,27 @@ function StudentSubclass() {
 
   // If Code Block Activity is open, show full-screen view
   if (isCodeBlockOpen && selectedActivity) {
+    // Parse config_json if it's a string
+    const configData = typeof selectedActivity.config_json === 'string' 
+      ? (() => {
+          try {
+            return JSON.parse(selectedActivity.config_json);
+          } catch (e) {
+            return {};
+          }
+        })()
+      : (selectedActivity.config_json || {});
+
     const codeBlockData = {
-      language: selectedActivity.language || selectedActivity.config_json?.language || 'python',
-      code: selectedActivity.code || selectedActivity.config_json?.code || '',
-      hiddenBlockIds: selectedActivity.hidden_block_ids || selectedActivity.config_json?.hiddenBlockIds || selectedActivity.hidden_block_ids || [],
+      language: selectedActivity.language || configData.language || 'python',
+      code: selectedActivity.code || configData.code || '',
+      hiddenBlockIds: selectedActivity.hidden_block_ids || configData.hiddenBlockIds || [],
+      correctBlockOrder: selectedActivity.correct_block_order || configData.correctBlockOrder || [],
     };
 
     console.log("=== StudentSubclass - Code Block Activity ===");
     console.log("Selected Activity:", selectedActivity);
+    console.log("Config Data:", configData);
     console.log("Code Block Data to pass:", codeBlockData);
     console.log("==========================================");
 

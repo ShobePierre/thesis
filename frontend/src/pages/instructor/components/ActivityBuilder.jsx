@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import QuizBuilder from "../../../activities/Quiz/QuizBuilder";
+import AnswerSequenceEditor from "../../../features/DragDrop/components/AnswerSequenceEditor";
 import { CodeBlockParser } from "../../../features/DragDrop/utils/codeBlockParser";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
@@ -38,6 +39,7 @@ function ActivityBuilder({
   const [codeBlockBlocks, setCodeBlockBlocks] = useState([]);
   const [codeBlockHiddenIds, setCodeBlockHiddenIds] = useState([]);
   const [codeBlockHints, setCodeBlockHints] = useState({});
+  const [codeBlockCorrectOrder, setCodeBlockCorrectOrder] = useState([]);
   const [parseError, setParseError] = useState("");
   
   // Enhanced features
@@ -175,6 +177,7 @@ function ActivityBuilder({
         setCodeBlockCode("");
         setCodeBlockBlocks([]);
         setCodeBlockHiddenIds([]);
+        setCodeBlockCorrectOrder([]);
         setCodeBlockHints({});
         setParseError("");
       }
@@ -592,6 +595,22 @@ function ActivityBuilder({
                     ))}
                   </div>
                 </div>
+
+                {/* Answer Sequence Configuration */}
+                {codeBlockHiddenIds.length > 0 && (
+                  <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h3 className="text-lg font-semibold text-blue-900 mb-2">✓ Configure Correct Answer Sequence</h3>
+                    <p className="text-sm text-blue-800 mb-4">
+                      Drag hidden blocks to set the correct order students must arrange them in.
+                    </p>
+                    <AnswerSequenceEditor 
+                      blocks={codeBlockBlocks}
+                      hiddenBlockIds={codeBlockHiddenIds}
+                      initialSequence={codeBlockCorrectOrder}
+                      onSequenceSet={setCodeBlockCorrectOrder}
+                    />
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -798,6 +817,7 @@ function ActivityBuilder({
                   language: codeBlockLanguage,
                   blocks: codeBlockBlocks,
                   hiddenBlockIds: codeBlockHiddenIds,
+                  correctBlockOrder: codeBlockCorrectOrder,
                   hints: codeBlockHints,
                   difficulty: codeBlockDifficulty,
                 } : null
@@ -808,7 +828,7 @@ function ActivityBuilder({
                 !dueDateTime ||
                 !title ||
                 (selectedActivity === "Quiz" && !linkedQuizId) ||
-                (selectedActivity === "Code Block Activity" && (!codeBlockCode || codeBlockBlocks.length === 0)) ||
+                (selectedActivity === "Code Block Activity" && (!codeBlockCode || codeBlockBlocks.length === 0 || codeBlockCorrectOrder.length === 0)) ||
                 isCreatingActivity
               }
               className={`px-8 py-2 rounded-lg font-bold transition transform ${
@@ -817,7 +837,7 @@ function ActivityBuilder({
                 dueDateTime &&
                 title &&
                 (selectedActivity !== "Quiz" || linkedQuizId) &&
-                (selectedActivity !== "Code Block Activity" || (codeBlockCode && codeBlockBlocks.length > 0)) &&
+                (selectedActivity !== "Code Block Activity" || (codeBlockCode && codeBlockBlocks.length > 0 && codeBlockCorrectOrder.length > 0)) &&
                 !isCreatingActivity
                   ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:shadow-lg hover:scale-105"
                   : "bg-gray-300 text-gray-500 cursor-not-allowed"

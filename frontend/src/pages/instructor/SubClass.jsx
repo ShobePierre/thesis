@@ -1314,6 +1314,7 @@ function SubClass() {
         formData.append("code", codeBlockData.code);
         formData.append("blocks", JSON.stringify(codeBlockData.blocks));
         formData.append("hiddenBlockIds", JSON.stringify(codeBlockData.hiddenBlockIds));
+        formData.append("correctBlockOrder", JSON.stringify(codeBlockData.correctBlockOrder));
         formData.append("difficulty", codeBlockData.difficulty);
         formData.append("hints", JSON.stringify(codeBlockData.hints));
       }

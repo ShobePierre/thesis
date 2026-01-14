@@ -106,6 +106,16 @@ exports.createActivity = (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
+    // Destructure additional fields for code block activities
+    const { correctBlockOrder } = req.body;
+
+    // Validate code block activity data
+    if (req.body.type === "codeblock") {
+      if (!correctBlockOrder || correctBlockOrder.length === 0) {
+        return res.status(400).json({ message: "Correct block order must be defined for code block activities" });
+      }
+    }
+
     // Store activity types and scheduling info in config_json
     // Also include Code Block Activity data if present
     const config_json = {
@@ -119,6 +129,7 @@ exports.createActivity = (req, res) => {
       ...(code && { code }),
       ...(blocks && { blocks: typeof blocks === 'string' ? JSON.parse(blocks) : blocks }),
       ...(hiddenBlockIds && { hiddenBlockIds: typeof hiddenBlockIds === 'string' ? JSON.parse(hiddenBlockIds) : hiddenBlockIds }),
+      ...(correctBlockOrder && { correctBlockOrder: typeof correctBlockOrder === 'string' ? JSON.parse(correctBlockOrder) : correctBlockOrder }),
       ...(difficulty && { difficulty }),
       ...(hints && { hints: typeof hints === 'string' ? JSON.parse(hints) : hints }),
       ...(type && { type })

@@ -510,53 +510,138 @@ export default class CodeBlockScene extends Phaser.Scene {
    * Validate student's solution
    */
   validateSolution() {
-    // Check which hidden blocks have been filled
-    const filledBlocks = this.dropZones.filter(zone => zone.filled);
+    console.log("🔍 Validating solution...");
+    
     const hiddenBlockCount = this.blocks.filter(b => b.isHidden).length;
+    const filledBlocks = this.dropZones.filter(zone => zone.filled);
 
-    console.log("🟢 Filled blocks:", filledBlocks.length, "/ Hidden blocks:", hiddenBlockCount);
-
+    // Check if all blocks are placed
     if (filledBlocks.length < hiddenBlockCount) {
-      console.log("🔴 Not all blocks answered");
-      if (this.validationCallback) {
-        this.validationCallback({
-          activityId: this.codeBlockData.activityId,
-          correct: false,
-          score: 0,
-          feedback: `Please complete all ${hiddenBlockCount - filledBlocks.length} missing code blocks.`,
-          errors: [`Missing ${hiddenBlockCount - filledBlocks.length} code blocks`],
-        });
-      }
+      const feedback = `Please complete all ${hiddenBlockCount - filledBlocks.length} missing code blocks.`;
+      console.log("🔴 Not all blocks answered:", feedback);
+      this.handleValidationResult(false, 0, feedback, [`Missing ${hiddenBlockCount - filledBlocks.length} code blocks`]);
       return;
     }
 
-    // All blocks filled
-    const correct = true;
-    const score = 100;
+    // Get the sequence of blocks the student placed
+    const studentSequence = this.dropZones
+      .filter(zone => zone.filled)
+      .map(zone => zone.blockId);
 
-    const validation = {
-      correct: correct,
-      score: score,
-      feedback: "All code blocks are correctly placed!",
-      errors: [],
-    };
+    console.log("Student Sequence:", studentSequence);
+    console.log("Correct Sequence:", this.codeBlockData.correctBlockOrder);
 
-    // Show validation feedback
-    this.showValidationFeedback(validation);
+    // Compare sequences
+    const isCorrect = this.compareBlockSequences(
+      studentSequence, 
+      this.codeBlockData.correctBlockOrder
+    );
 
-    // Call validation callback
+    if (isCorrect) {
+      console.log("🟢 Solution is correct!");
+      this.handleValidationResult(true, 100, "✓ Correct! All blocks are in the right order!", []);
+    } else {
+      console.log("🔴 Solution is incorrect");
+      const errors = this.findSequenceErrors(studentSequence, this.codeBlockData.correctBlockOrder);
+      this.handleValidationResult(
+        false, 
+        this.calculatePartialScore(studentSequence, this.codeBlockData.correctBlockOrder), 
+        "✗ Some blocks are not in the correct order. Please review and try again.", 
+        errors
+      );
+    }
+  }
+
+  /**
+   * Compare student's block sequence with correct sequence
+   */
+  compareBlockSequences(studentSequence, correctSequence) {
+    if (!Array.isArray(studentSequence) || !Array.isArray(correctSequence)) {
+      console.error("Invalid sequences for comparison");
+      return false;
+    }
+
+    if (studentSequence.length !== correctSequence.length) {
+      console.log("Length mismatch:", studentSequence.length, "vs", correctSequence.length);
+      return false;
+    }
+
+    // Compare each block
+    for (let i = 0; i < studentSequence.length; i++) {
+      if (studentSequence[i] !== correctSequence[i]) {
+        console.log(`Mismatch at position ${i}: ${studentSequence[i]} vs ${correctSequence[i]}`);
+        return false;
+      }
+    }
+
+    console.log("✓ All blocks match!");
+    return true;
+  }
+
+  /**
+   * Find which blocks are in wrong positions
+   */
+  findSequenceErrors(studentSequence, correctSequence) {
+    const errors = [];
+    
+    for (let i = 0; i < studentSequence.length; i++) {
+      if (studentSequence[i] !== correctSequence[i]) {
+        const wrongBlockId = studentSequence[i];
+        const correctBlockId = correctSequence[i];
+        const wrongBlock = this.blocks.find(b => b.id === wrongBlockId);
+        const correctBlock = this.blocks.find(b => b.id === correctBlockId);
+        
+        errors.push({
+          position: i + 1,
+          studentBlock: wrongBlock?.content?.substring(0, 40),
+          correctBlock: correctBlock?.content?.substring(0, 40),
+          message: `Position ${i + 1}: Expected "${correctBlock?.content?.substring(0, 40)}" but got "${wrongBlock?.content?.substring(0, 40)}"`
+        });
+      }
+    }
+    
+    return errors;
+  }
+
+  /**
+   * Calculate partial score (percentage of correct blocks)
+   */
+  calculatePartialScore(studentSequence, correctSequence) {
+    if (studentSequence.length === 0) return 0;
+    
+    let correctCount = 0;
+    for (let i = 0; i < studentSequence.length; i++) {
+      if (i < correctSequence.length && studentSequence[i] === correctSequence[i]) {
+        correctCount++;
+      }
+    }
+    
+    return Math.floor((correctCount / studentSequence.length) * 100);
+  }
+
+  /**
+   * Handle validation result and display feedback
+   */
+  handleValidationResult(correct, score, feedback, errors) {
+    console.log("Validation Result:", { correct, score, feedback, errors });
+
+    this.showValidationFeedback({ correct, score, feedback, errors });
+
     if (this.validationCallback) {
       this.validationCallback({
         activityId: this.codeBlockData.activityId,
-        correct: validation.correct,
-        score: validation.score,
-        feedback: validation.feedback,
-        errors: validation.errors,
+        correct: correct,
+        score: score,
+        feedback: feedback,
+        errors: errors,
+        studentSequence: this.dropZones
+          .filter(zone => zone.filled)
+          .map(zone => zone.blockId),
       });
     }
 
     // Save checkpoint if correct
-    if (validation.correct && this.onCheckpointComplete) {
+    if (correct && this.onCheckpointComplete) {
       this.onCheckpointComplete({
         checkpoint: this.codeBlockData.checkpointId,
         data: { 
@@ -577,41 +662,104 @@ export default class CodeBlockScene extends Phaser.Scene {
       if (child.isFeedback) child.destroy();
     });
 
+    // Calculate feedback box height based on number of errors
+    let boxHeight = validation.correct ? 200 : Math.min(280 + (validation.errors?.length || 0) * 40, 500);
+
     // Create feedback box
     const feedbackBg = this.add.rectangle(
       width / 2,
       height / 2,
-      400,
-      150,
+      Math.min(500, width - 40),
+      boxHeight,
       validation.correct ? 0x00aa44 : 0xaa0000,
-      0.9
+      0.95
     );
+    feedbackBg.setStrokeStyle(3, validation.correct ? 0x00ff88 : 0xff6666, 1);
     feedbackBg.isFeedback = true;
 
-    // Feedback text
+    let currentY = height / 2 - boxHeight / 2 + 30;
+
+    // Main feedback text
     const feedbackText = this.add.text(
       width / 2,
-      height / 2,
+      currentY,
       validation.feedback,
       {
-        fontSize: "16px",
+        fontSize: "18px",
         fontFamily: "Arial",
         color: "#ffffff",
         align: "center",
-        wordWrap: { width: 380 },
+        fontStyle: "bold",
+        wordWrap: { width: Math.min(480, width - 60) },
       }
     ).setOrigin(0.5);
     feedbackText.isFeedback = true;
 
+    currentY += 50;
+
+    // Score display
+    const scoreText = this.add.text(
+      width / 2,
+      currentY,
+      `Score: ${validation.score}%`,
+      {
+        fontSize: "24px",
+        fontFamily: "Arial",
+        color: validation.correct ? "#ffffff" : "#ffaaaa",
+        fontStyle: "bold",
+      }
+    ).setOrigin(0.5);
+    scoreText.isFeedback = true;
+
+    currentY += 50;
+
+    // Error details (if incorrect)
+    if (!validation.correct && validation.errors && validation.errors.length > 0) {
+      validation.errors.slice(0, 3).forEach((err, idx) => {
+        const errorText = this.add.text(
+          width / 2,
+          currentY + (idx * 35),
+          err.message,
+          {
+            fontSize: "11px",
+            fontFamily: "monospace",
+            color: "#ffdddd",
+            align: "center",
+            wordWrap: { width: Math.min(480, width - 60) },
+          }
+        ).setOrigin(0.5);
+        errorText.isFeedback = true;
+      });
+
+      if (validation.errors.length > 3) {
+        const moreText = this.add.text(
+          width / 2,
+          currentY + (3 * 35),
+          `...and ${validation.errors.length - 3} more error(s)`,
+          {
+            fontSize: "10px",
+            fontFamily: "Arial",
+            color: "#ffaaaa",
+            align: "center",
+          }
+        ).setOrigin(0.5);
+        moreText.isFeedback = true;
+      }
+    }
+
     // Animate feedback
     this.tweens.add({
-      targets: [feedbackBg, feedbackText],
+      targets: [feedbackBg, feedbackText, scoreText],
       alpha: 0,
-      delay: 3000,
+      delay: validation.correct ? 4000 : 5000,
       duration: 500,
       onComplete: () => {
         feedbackBg.destroy();
         feedbackText.destroy();
+        scoreText.destroy();
+        this.children.list.forEach(child => {
+          if (child.isFeedback) child.destroy();
+        });
       },
     });
   }
