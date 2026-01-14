@@ -62,6 +62,22 @@ class SuperAdminAPI {
     });
   }
 
+  async toggleUserLock(userId, isLocked, reason = '') {
+    return this.request(`/users/${userId}/lock`, {
+      method: 'PUT',
+      body: JSON.stringify({ isLocked, reason }),
+    });
+  }
+
+  // ==================== ADMIN MESSAGES ====================
+
+  async sendMessage(userId, title, content) {
+    return this.request('/messages', {
+      method: 'POST',
+      body: JSON.stringify({ user_id: userId, title, content }),
+    });
+  }
+
   // ==================== SUBMISSIONS ====================
 
   async getSubmissions(params = {}) {

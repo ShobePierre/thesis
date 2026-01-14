@@ -1396,10 +1396,10 @@ function SubClass() {
         showMenu={false}
       />
 
-      <div className="flex flex-1 md:grid md:grid-cols-[auto_1fr] md:gap-0">
+      <div className="flex flex-1 md:ml-72">
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-        <main className="flex-1 px-6 sm:px-10 py-18 mt-15 space-y-10">
+        <main className="flex-1 px-6 sm:px-10 py-18 mt-15 space-y-10 w-full">
           {/* Back to Classes & Welcome Section Combined */}
           <div className="relative flex flex-col items-center justify-center text-center">
             <button

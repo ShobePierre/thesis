@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 14, 2026 at 10:04 AM
+-- Generation Time: Jan 14, 2026 at 02:16 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -47,7 +47,8 @@ INSERT INTO `activities` (`activity_id`, `subject_id`, `instructor_id`, `title`,
 (45, 20, 14, 'TESTING', 'DIY Activity', 'other', '{\"activity_name\":\"DIY Activity\",\"instructions\":null,\"open_date_time\":\"2026-01-13T14:10:00.000Z\",\"due_date_time\":\"2026-01-16T14:10:00.000Z\"}', '2026-01-13 14:11:06', '2026-01-13 14:11:06'),
 (66, 21, 14, 'cbl1', 'Code Block Activity', 'other', '{\"activity_name\":\"Code Block Activity\",\"instructions\":null,\"open_date_time\":\"2026-01-14T08:26:00.000Z\",\"due_date_time\":\"2026-01-17T08:26:00.000Z\",\"language\":\"python\",\"code\":\"score = 85\\r\\n\\r\\nif score >= 90:\\r\\n    grade = \\\"A\\\"\\r\\nelif score >= 80:\\r\\n    grade = \\\"B\\\"\\r\\nelif score >= 70:\\r\\n    grade = \\\"C\\\"\\r\\nelif score >= 60:\\r\\n    grade = \\\"D\\\"\\r\\nelse:\\r\\n    grade = \\\"F\\\"\\r\\n\\r\\nprint(\\\"Grade:\\\", grade)\\r\\n\",\"blocks\":[{\"id\":\"block_0\",\"content\":\"score = 85\",\"type\":\"VARIABLE\",\"lineIndex\":0,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_1\",\"content\":\"if score >= 90:\",\"type\":\"CONDITION\",\"lineIndex\":2,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_2\",\"content\":\"grade = \\\"A\\\"\",\"type\":\"VARIABLE\",\"lineIndex\":3,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_3\",\"content\":\"elif score >= 80:\",\"type\":\"VARIABLE\",\"lineIndex\":4,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_4\",\"content\":\"grade = \\\"B\\\"\",\"type\":\"VARIABLE\",\"lineIndex\":5,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_5\",\"content\":\"elif score >= 70:\",\"type\":\"VARIABLE\",\"lineIndex\":6,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_6\",\"content\":\"grade = \\\"C\\\"\",\"type\":\"VARIABLE\",\"lineIndex\":7,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_7\",\"content\":\"elif score >= 60:\",\"type\":\"VARIABLE\",\"lineIndex\":8,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_8\",\"content\":\"grade = \\\"D\\\"\",\"type\":\"VARIABLE\",\"lineIndex\":9,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_9\",\"content\":\"else:\",\"type\":\"CONDITION\",\"lineIndex\":10,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_10\",\"content\":\"grade = \\\"F\\\"\",\"type\":\"VARIABLE\",\"lineIndex\":11,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_11\",\"content\":\"print(\\\"Grade:\\\", grade)\",\"type\":\"STATEMENT\",\"lineIndex\":13,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"}],\"hiddenBlockIds\":[\"block_1\",\"block_9\"],\"correctBlockOrder\":[\"block_1\",\"block_9\"],\"difficulty\":\"easy\",\"hints\":{}}', '2026-01-14 08:26:55', '2026-01-14 08:26:55'),
 (67, 21, 14, 'CBL4', 'Code Block Activity', 'other', '{\"activity_name\":\"Code Block Activity\",\"instructions\":\"gege\",\"open_date_time\":\"2026-01-14T08:39:00.000Z\",\"due_date_time\":\"2026-01-17T08:39:00.000Z\",\"language\":\"python\",\"code\":\"score = 85\\r\\n\\r\\nif score >= 90:\\r\\n    grade = \\\"A\\\"\\r\\nelif score >= 80:\\r\\n    grade = \\\"B\\\"\\r\\nelif score >= 70:\\r\\n    grade = \\\"C\\\"\\r\\nelif score >= 60:\\r\\n    grade = \\\"D\\\"\\r\\nelse:\\r\\n    grade = \\\"F\\\"\\r\\n\\r\\nprint(\\\"Grade:\\\", grade)\\r\\n\",\"blocks\":[{\"id\":\"block_0\",\"content\":\"score = 85\",\"type\":\"VARIABLE\",\"lineIndex\":0,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_1\",\"content\":\"if score >= 90:\",\"type\":\"CONDITION\",\"lineIndex\":2,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_2\",\"content\":\"grade = \\\"A\\\"\",\"type\":\"VARIABLE\",\"lineIndex\":3,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_3\",\"content\":\"elif score >= 80:\",\"type\":\"VARIABLE\",\"lineIndex\":4,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_4\",\"content\":\"grade = \\\"B\\\"\",\"type\":\"VARIABLE\",\"lineIndex\":5,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_5\",\"content\":\"elif score >= 70:\",\"type\":\"VARIABLE\",\"lineIndex\":6,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_6\",\"content\":\"grade = \\\"C\\\"\",\"type\":\"VARIABLE\",\"lineIndex\":7,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_7\",\"content\":\"elif score >= 60:\",\"type\":\"VARIABLE\",\"lineIndex\":8,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_8\",\"content\":\"grade = \\\"D\\\"\",\"type\":\"VARIABLE\",\"lineIndex\":9,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_9\",\"content\":\"else:\",\"type\":\"CONDITION\",\"lineIndex\":10,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_10\",\"content\":\"grade = \\\"F\\\"\",\"type\":\"VARIABLE\",\"lineIndex\":11,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_11\",\"content\":\"print(\\\"Grade:\\\", grade)\",\"type\":\"STATEMENT\",\"lineIndex\":13,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"}],\"hiddenBlockIds\":[\"block_1\",\"block_9\"],\"correctBlockOrder\":[\"block_1\",\"block_9\"],\"difficulty\":\"easy\",\"hints\":{}}', '2026-01-14 08:39:40', '2026-01-14 08:39:40'),
-(68, 21, 14, 'ccc', 'Code Block Activity', 'other', '{\"activity_name\":\"Code Block Activity\",\"instructions\":null,\"open_date_time\":\"2026-01-14T08:51:00.000Z\",\"due_date_time\":\"2026-01-17T08:51:00.000Z\",\"language\":\"python\",\"code\":\"score = 85\\r\\n\\r\\nif score >= 90:\\r\\n    grade = \\\"A\\\"\\r\\nelif score >= 80:\\r\\n    grade = \\\"B\\\"\\r\\nelif score >= 70:\\r\\n    grade = \\\"C\\\"\\r\\nelif score >= 60:\\r\\n    grade = \\\"D\\\"\\r\\nelse:\\r\\n    grade = \\\"F\\\"\\r\\n\\r\\nprint(\\\"Grade:\\\", grade)\\r\\n\",\"blocks\":[{\"id\":\"block_0\",\"content\":\"score = 85\",\"type\":\"VARIABLE\",\"lineIndex\":0,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_1\",\"content\":\"if score >= 90:\",\"type\":\"CONDITION\",\"lineIndex\":2,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_2\",\"content\":\"grade = \\\"A\\\"\",\"type\":\"VARIABLE\",\"lineIndex\":3,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_3\",\"content\":\"elif score >= 80:\",\"type\":\"VARIABLE\",\"lineIndex\":4,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_4\",\"content\":\"grade = \\\"B\\\"\",\"type\":\"VARIABLE\",\"lineIndex\":5,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_5\",\"content\":\"elif score >= 70:\",\"type\":\"VARIABLE\",\"lineIndex\":6,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_6\",\"content\":\"grade = \\\"C\\\"\",\"type\":\"VARIABLE\",\"lineIndex\":7,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_7\",\"content\":\"elif score >= 60:\",\"type\":\"VARIABLE\",\"lineIndex\":8,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_8\",\"content\":\"grade = \\\"D\\\"\",\"type\":\"VARIABLE\",\"lineIndex\":9,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_9\",\"content\":\"else:\",\"type\":\"CONDITION\",\"lineIndex\":10,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_10\",\"content\":\"grade = \\\"F\\\"\",\"type\":\"VARIABLE\",\"lineIndex\":11,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_11\",\"content\":\"print(\\\"Grade:\\\", grade)\",\"type\":\"STATEMENT\",\"lineIndex\":13,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"}],\"hiddenBlockIds\":[\"block_1\",\"block_9\"],\"correctBlockOrder\":[\"block_1\",\"block_9\"],\"difficulty\":\"easy\",\"hints\":{}}', '2026-01-14 08:51:09', '2026-01-14 08:51:09');
+(68, 21, 14, 'ccc', 'Code Block Activity', 'other', '{\"activity_name\":\"Code Block Activity\",\"instructions\":null,\"open_date_time\":\"2026-01-14T08:51:00.000Z\",\"due_date_time\":\"2026-01-17T08:51:00.000Z\",\"language\":\"python\",\"code\":\"score = 85\\r\\n\\r\\nif score >= 90:\\r\\n    grade = \\\"A\\\"\\r\\nelif score >= 80:\\r\\n    grade = \\\"B\\\"\\r\\nelif score >= 70:\\r\\n    grade = \\\"C\\\"\\r\\nelif score >= 60:\\r\\n    grade = \\\"D\\\"\\r\\nelse:\\r\\n    grade = \\\"F\\\"\\r\\n\\r\\nprint(\\\"Grade:\\\", grade)\\r\\n\",\"blocks\":[{\"id\":\"block_0\",\"content\":\"score = 85\",\"type\":\"VARIABLE\",\"lineIndex\":0,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_1\",\"content\":\"if score >= 90:\",\"type\":\"CONDITION\",\"lineIndex\":2,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_2\",\"content\":\"grade = \\\"A\\\"\",\"type\":\"VARIABLE\",\"lineIndex\":3,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_3\",\"content\":\"elif score >= 80:\",\"type\":\"VARIABLE\",\"lineIndex\":4,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_4\",\"content\":\"grade = \\\"B\\\"\",\"type\":\"VARIABLE\",\"lineIndex\":5,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_5\",\"content\":\"elif score >= 70:\",\"type\":\"VARIABLE\",\"lineIndex\":6,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_6\",\"content\":\"grade = \\\"C\\\"\",\"type\":\"VARIABLE\",\"lineIndex\":7,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_7\",\"content\":\"elif score >= 60:\",\"type\":\"VARIABLE\",\"lineIndex\":8,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_8\",\"content\":\"grade = \\\"D\\\"\",\"type\":\"VARIABLE\",\"lineIndex\":9,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_9\",\"content\":\"else:\",\"type\":\"CONDITION\",\"lineIndex\":10,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_10\",\"content\":\"grade = \\\"F\\\"\",\"type\":\"VARIABLE\",\"lineIndex\":11,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"},{\"id\":\"block_11\",\"content\":\"print(\\\"Grade:\\\", grade)\",\"type\":\"STATEMENT\",\"lineIndex\":13,\"position\":0,\"isHidden\":false,\"hint\":null,\"difficulty\":\"easy\"}],\"hiddenBlockIds\":[\"block_1\",\"block_9\"],\"correctBlockOrder\":[\"block_1\",\"block_9\"],\"difficulty\":\"easy\",\"hints\":{}}', '2026-01-14 08:51:09', '2026-01-14 08:51:09'),
+(70, 22, 18, 'C++', 'Quiz', 'quiz', '{\"activity_name\":\"Quiz\",\"instructions\":null,\"open_date_time\":\"2026-01-14T10:50:00.000Z\",\"due_date_time\":\"2026-01-15T10:50:00.000Z\"}', '2026-01-14 10:50:43', '2026-01-14 10:50:43');
 
 -- --------------------------------------------------------
 
@@ -103,6 +104,13 @@ CREATE TABLE `activity_quiz_links` (
   `quiz_id` int(11) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `activity_quiz_links`
+--
+
+INSERT INTO `activity_quiz_links` (`link_id`, `activity_id`, `quiz_id`, `created_at`) VALUES
+(12, 70, 16, '2026-01-14 10:50:43');
 
 -- --------------------------------------------------------
 
@@ -163,6 +171,35 @@ INSERT INTO `activity_submission_attachments` (`attachment_id`, `submission_id`,
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `admin_messages`
+--
+
+CREATE TABLE `admin_messages` (
+  `message_id` int(11) NOT NULL,
+  `admin_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `content` longtext NOT NULL,
+  `is_read` tinyint(1) DEFAULT 0,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `read_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `admin_messages`
+--
+
+INSERT INTO `admin_messages` (`message_id`, `admin_id`, `user_id`, `title`, `content`, `is_read`, `created_at`, `read_at`) VALUES
+(1, 12, 18, 'Hey you', 'Go out soon', 1, '2026-01-14 18:21:57', '2026-01-14 21:04:49'),
+(2, 12, 17, 'Hey you', 'yeah you', 1, '2026-01-14 18:22:23', '2026-01-14 18:22:30'),
+(3, 12, 18, 'hey', 'I want you to make another classroom', 1, '2026-01-14 20:42:01', '2026-01-14 21:04:46'),
+(4, 12, 17, 'hello', 'hi', 1, '2026-01-14 20:43:10', '2026-01-14 20:43:42'),
+(5, 12, 17, 'nc', '1111', 1, '2026-01-14 20:59:15', '2026-01-14 21:00:29'),
+(6, 12, 18, 'test 2 ', 'hey', 1, '2026-01-14 21:05:36', '2026-01-14 21:05:43');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `announcements`
 --
 
@@ -173,6 +210,15 @@ CREATE TABLE `announcements` (
   `content` text NOT NULL,
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `announcements`
+--
+
+INSERT INTO `announcements` (`announcement_id`, `subject_id`, `instructor_id`, `content`, `created_at`) VALUES
+(21, 22, 18, 'Hey', '2026-01-14 18:47:16'),
+(22, 22, 18, 'hey', '2026-01-14 18:47:38'),
+(23, 22, 18, 'hey', '2026-01-14 18:47:53');
 
 -- --------------------------------------------------------
 
@@ -581,7 +627,207 @@ INSERT INTO `audit_logs` (`log_id`, `user_id`, `action`, `entity_type`, `entity_
 (380, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0', '2026-01-14 07:48:09'),
 (381, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0', '2026-01-14 07:48:09'),
 (382, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0', '2026-01-14 07:48:09'),
-(383, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0', '2026-01-14 07:48:09');
+(383, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0', '2026-01-14 07:48:09'),
+(384, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:25:33'),
+(385, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:25:33'),
+(386, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:25:33'),
+(387, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:25:33'),
+(388, 12, 'update_user', 'user', 18, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:26:04'),
+(389, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:26:04'),
+(390, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:26:04'),
+(391, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:26:41'),
+(392, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:26:41'),
+(393, 12, 'view_audit_logs', 'audit', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:27:58'),
+(394, 12, 'view_audit_logs', 'audit', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:27:58'),
+(395, 12, 'export_users_csv', 'export', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:28:15'),
+(396, 12, 'export_users_csv', 'export', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:28:20'),
+(397, 12, 'view_audit_logs', 'audit', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:28:49'),
+(398, 12, 'view_audit_logs', 'audit', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:28:49'),
+(399, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:28:51'),
+(400, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:28:51'),
+(401, 12, 'view_audit_logs', 'audit', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:29:12'),
+(402, 12, 'view_audit_logs', 'audit', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:29:12'),
+(403, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:29:15'),
+(404, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:29:15'),
+(405, 12, 'view_audit_logs', 'audit', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:29:23'),
+(406, 12, 'view_audit_logs', 'audit', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:29:23'),
+(407, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:29:24'),
+(408, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:29:24'),
+(409, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:34:41'),
+(410, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:34:41'),
+(411, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:34:48'),
+(412, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:34:53'),
+(413, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:35:19'),
+(414, 12, 'toggle_user_lock', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:36:33'),
+(415, 12, 'toggle_user_lock', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:37:06'),
+(416, 12, 'lock_user', 'user', 17, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:39:07'),
+(417, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:39:07'),
+(418, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:39:07'),
+(419, 12, 'unlock_user', 'user', 17, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:40:29'),
+(420, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:40:29'),
+(421, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:40:29'),
+(422, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 17:49:06'),
+(423, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 18:21:00'),
+(424, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 18:21:00'),
+(425, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 18:21:00'),
+(426, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 18:21:00'),
+(427, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 18:21:45'),
+(428, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 18:21:45'),
+(429, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 18:21:45'),
+(430, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 18:21:45'),
+(431, 12, 'send_message', 'message', 1, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 18:21:57'),
+(432, 12, 'send_message', 'message', 2, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 18:22:23'),
+(433, 12, 'view_audit_logs', 'audit', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 18:23:23'),
+(434, 12, 'view_audit_logs', 'audit', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 18:23:23'),
+(435, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 18:23:26'),
+(436, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 18:23:26'),
+(437, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:24:54'),
+(438, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:24:54'),
+(439, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:24:54'),
+(440, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:24:54'),
+(441, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:39:51'),
+(442, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:39:51'),
+(443, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:39:51'),
+(444, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:39:51'),
+(445, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:40:03'),
+(446, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:40:03'),
+(447, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:40:03'),
+(448, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:40:03'),
+(449, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:40:50'),
+(450, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:40:50'),
+(451, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:40:50'),
+(452, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:40:50'),
+(453, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:40:55'),
+(454, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:41:02'),
+(455, 12, 'lock_user', 'user', 18, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:41:15'),
+(456, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:41:16'),
+(457, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:41:16'),
+(458, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:41:40'),
+(459, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:41:40'),
+(460, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:41:40'),
+(461, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:41:40'),
+(462, 12, 'unlock_user', 'user', 18, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:41:44'),
+(463, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:41:44'),
+(464, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:41:44'),
+(465, 12, 'send_message', 'message', 3, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:42:01'),
+(466, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:42:58'),
+(467, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:42:58'),
+(468, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:42:58'),
+(469, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:42:58'),
+(470, 12, 'send_message', 'message', 4, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:43:10'),
+(471, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:43:19'),
+(472, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:43:22'),
+(473, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:44:21');
+INSERT INTO `audit_logs` (`log_id`, `user_id`, `action`, `entity_type`, `entity_id`, `old_value`, `new_value`, `ip_address`, `user_agent`, `created_at`) VALUES
+(474, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:44:21'),
+(475, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:44:21'),
+(476, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:44:21'),
+(477, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:04'),
+(478, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:04'),
+(479, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:04'),
+(480, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:04'),
+(481, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:08'),
+(482, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:13'),
+(483, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:13'),
+(484, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:13'),
+(485, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:13'),
+(486, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:13'),
+(487, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:13'),
+(488, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:13'),
+(489, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:13'),
+(490, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:13'),
+(491, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:13'),
+(492, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:13'),
+(493, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:13'),
+(494, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:13'),
+(495, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:13'),
+(496, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:14'),
+(497, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:14'),
+(498, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:14'),
+(499, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:14'),
+(500, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:14'),
+(501, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:14'),
+(502, 12, 'view_audit_logs', 'audit', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:31'),
+(503, 12, 'view_audit_logs', 'audit', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:32'),
+(504, 12, 'view_audit_logs', 'audit', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:37'),
+(505, 12, 'view_audit_logs', 'audit', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:37'),
+(506, 12, 'view_audit_logs', 'audit', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:48'),
+(507, 12, 'view_audit_logs', 'audit', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:48'),
+(508, 12, 'export_users_csv', 'export', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:55:54'),
+(509, 12, 'export_submissions_json', 'export', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:56:07'),
+(510, 12, 'export_submissions_csv', 'export', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:56:13'),
+(511, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:56:22'),
+(512, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:56:22'),
+(513, 12, 'view_audit_logs', 'audit', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:56:22'),
+(514, 12, 'view_audit_logs', 'audit', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:56:22'),
+(515, 12, 'view_audit_logs', 'audit', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:56:25'),
+(516, 12, 'view_audit_logs', 'audit', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:56:26'),
+(517, 12, 'view_audit_logs', 'audit', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:57:16'),
+(518, 12, 'view_audit_logs', 'audit', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:57:16'),
+(519, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:57:16'),
+(520, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:57:16'),
+(521, 12, 'view_audit_logs', 'audit', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:58:36'),
+(522, 12, 'view_audit_logs', 'audit', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:58:36'),
+(523, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:58:37'),
+(524, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:58:37'),
+(525, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:59:06'),
+(526, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:59:06'),
+(527, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:59:07'),
+(528, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:59:07'),
+(529, 12, 'send_message', 'message', 5, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 20:59:15'),
+(530, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:05:25'),
+(531, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:05:25'),
+(532, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:05:25'),
+(533, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:05:25'),
+(534, 12, 'send_message', 'message', 6, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:05:36'),
+(535, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:05:43'),
+(536, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:05:43'),
+(537, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:05:44'),
+(538, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:05:44'),
+(539, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:07:07'),
+(540, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:07:07'),
+(541, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:07:07'),
+(542, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:07:07'),
+(543, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:10:39'),
+(544, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:10:40'),
+(545, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:11:18'),
+(546, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:11:18'),
+(547, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:11:18'),
+(548, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:11:18'),
+(549, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:11:30'),
+(550, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:11:30'),
+(551, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:11:30'),
+(552, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:11:30'),
+(553, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:12:00'),
+(554, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:12:30'),
+(555, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:13:00'),
+(556, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:13:30'),
+(557, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:14:00'),
+(558, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:14:30'),
+(559, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:15:00'),
+(560, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:15:03'),
+(561, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:15:04'),
+(562, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:15:04'),
+(563, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:15:04'),
+(564, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:15:24'),
+(565, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:15:24'),
+(566, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:15:24'),
+(567, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:15:24'),
+(568, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:15:37'),
+(569, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:15:37'),
+(570, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:15:37'),
+(571, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:15:37'),
+(572, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:15:38'),
+(573, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:15:38'),
+(574, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:15:38'),
+(575, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:15:38'),
+(576, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:15:55'),
+(577, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:15:55'),
+(578, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:15:55'),
+(579, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:15:55'),
+(580, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:16:09'),
+(581, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:16:09'),
+(582, 12, 'view_all_users', 'user', NULL, NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2026-01-14 21:16:26');
 
 -- --------------------------------------------------------
 
@@ -756,6 +1002,14 @@ CREATE TABLE `posting_teacher` (
   `uploaded_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `posting_teacher`
+--
+
+INSERT INTO `posting_teacher` (`posting_id`, `announcement_id`, `asset_type`, `original_name`, `stored_name`, `file_path`, `mime_type`, `file_size`, `uploaded_at`) VALUES
+(3, 22, 'PHOTO_VIDEO', 'ancient-ruins-circle-stone-platform-260nw-2167200551.jpg', '1768387658123-ancient-ruins-circle-stone-platform-260nw-2167200551.jpg', 'uploads/announcements/1768387658123-ancient-ruins-circle-stone-platform-260nw-2167200551.jpg', 'image/jpeg', 42552, '2026-01-14 18:47:38'),
+(4, 23, 'PHOTO_VIDEO', 'Yes.png', '1768387673435-Yes.png', 'uploads/announcements/1768387673435-Yes.png', 'image/png', 5424, '2026-01-14 18:47:53');
+
 -- --------------------------------------------------------
 
 --
@@ -784,7 +1038,8 @@ CREATE TABLE `quizzes` (
 --
 
 INSERT INTO `quizzes` (`quiz_id`, `instructor_id`, `title`, `description`, `is_published`, `total_points`, `time_limit_minutes`, `passing_score`, `shuffle_questions`, `shuffle_choices`, `show_score_immediately`, `allow_review`, `created_at`, `updated_at`) VALUES
-(7, 14, 'Quiz#1', 'take your time', 0, 0.00, 44, 60.00, 0, 0, 1, 1, '2026-01-14 00:08:06', '2026-01-14 00:08:06');
+(7, 14, 'Quiz#1', 'take your time', 0, 0.00, 44, 60.00, 0, 0, 1, 1, '2026-01-14 00:08:06', '2026-01-14 00:08:06'),
+(16, 18, 'hey', 'dsada', 0, 0.00, 1, 60.00, 0, 0, 1, 1, '2026-01-14 10:50:40', '2026-01-14 10:50:40');
 
 -- --------------------------------------------------------
 
@@ -820,6 +1075,14 @@ CREATE TABLE `quiz_attempts` (
   `time_taken_seconds` int(11) DEFAULT NULL,
   `is_completed` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `quiz_attempts`
+--
+
+INSERT INTO `quiz_attempts` (`attempt_id`, `quiz_id`, `student_id`, `activity_id`, `score`, `percentage`, `passed`, `started_at`, `submitted_at`, `time_taken_seconds`, `is_completed`) VALUES
+(18, 16, 17, 70, NULL, NULL, 0, '2026-01-14 10:52:45', NULL, NULL, 0),
+(19, 16, 17, 70, NULL, NULL, 0, '2026-01-14 10:52:45', NULL, NULL, 0);
 
 -- --------------------------------------------------------
 
@@ -859,7 +1122,8 @@ CREATE TABLE `quiz_questions` (
 --
 
 INSERT INTO `quiz_questions` (`question_id`, `quiz_id`, `question_text`, `question_type`, `points`, `order`, `created_at`, `updated_at`) VALUES
-(13, 7, 'Q1', 'multiple_choice', 1.00, 0, '2026-01-14 00:08:06', '2026-01-14 00:08:06');
+(13, 7, 'Q1', 'multiple_choice', 1.00, 0, '2026-01-14 00:08:06', '2026-01-14 00:08:06'),
+(22, 16, 'sadada', 'multiple_choice', 1.00, 0, '2026-01-14 10:50:40', '2026-01-14 10:50:40');
 
 -- --------------------------------------------------------
 
@@ -875,6 +1139,14 @@ CREATE TABLE `quiz_question_choices` (
   `order` int(11) DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `quiz_question_choices`
+--
+
+INSERT INTO `quiz_question_choices` (`choice_id`, `question_id`, `choice_text`, `is_correct`, `order`, `created_at`) VALUES
+(53, 22, 'sadada', 1, 0, '2026-01-14 10:50:40'),
+(54, 22, 'sad', 0, 1, '2026-01-14 10:50:40');
 
 -- --------------------------------------------------------
 
@@ -968,7 +1240,8 @@ CREATE TABLE `student_subjects` (
 
 INSERT INTO `student_subjects` (`id`, `student_id`, `subject_id`, `joined_at`) VALUES
 (12, 15, 20, '2026-01-13 20:12:31'),
-(13, 15, 21, '2026-01-14 00:03:06');
+(13, 15, 21, '2026-01-14 00:03:06'),
+(15, 17, 22, '2026-01-14 19:07:50');
 
 -- --------------------------------------------------------
 
@@ -992,7 +1265,9 @@ CREATE TABLE `subjects` (
 
 INSERT INTO `subjects` (`subject_id`, `instructor_id`, `title`, `description`, `class_code`, `created_at`, `is_archived`) VALUES
 (20, 14, 'Testing', 'Tester', '3ORYTGV83W', '2026-01-13 20:07:30', 1),
-(21, 14, 'Test', 'Course', 'IO0N9SS8M8', '2026-01-13 23:48:31', 0);
+(21, 14, 'Test', 'Course', 'IO0N9SS8M8', '2026-01-13 23:48:31', 0),
+(22, 18, 'English', 'NC2', 'TUVUO3C40R', '2026-01-14 18:36:36', 1),
+(23, 18, 'INFROGIT', 'BSIT 4B', 'OUBYO2UMJV', '2026-01-14 20:46:20', 0);
 
 -- --------------------------------------------------------
 
@@ -1023,19 +1298,24 @@ CREATE TABLE `users` (
   `email` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL,
   `profile_picture` varchar(255) DEFAULT NULL,
+  `is_locked` tinyint(1) DEFAULT 0,
   `created_at` datetime DEFAULT current_timestamp(),
-  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `locked_at` datetime DEFAULT NULL,
+  `locked_reason` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`user_id`, `role_id`, `username`, `email`, `password`, `profile_picture`, `created_at`, `updated_at`) VALUES
-(12, 1, 'superadmin', 'superadmin@account.com', '$2b$10$T.26b735YO8l6lCRX9SyOOOan6Xr9aIoLp4IL8H3n9lN6HvktyHZO', '/uploads/avatars/avatar-1768303595520-674066993.jpg', '2026-01-11 13:54:16', '2026-01-13 19:26:35'),
-(14, 2, 'Instructor', 'instructor@email.com', '$2b$10$S3bj7Lmb6HcIr6qIMLap4ubr.eNJIF3RHPZkJjHb42/D.0JJxgchW', '/uploads/avatars/avatar-1768305653517-770944451.png', '2026-01-13 20:00:53', '2026-01-14 08:31:46'),
-(15, 3, 'Student', 'student@email.com', '$2b$10$NqkZGMZWyNEwnNB1QuhYwOWfpgf8sOGv8lILONUukSzsd4q9O/Dqm', '/uploads/avatars/avatar-1768306326842-613300419.png', '2026-01-13 20:12:07', '2026-01-14 08:27:06'),
-(16, 3, 'TEST2', 'student2@gmail.com', '$2b$10$9.YHY05dp7WfOrVqZ48IPuTRykGQfUy6rB6F09RI9tDNZs7yOckmG', '/uploads/avatars/avatar-1768312294530-514777482.png', '2026-01-13 21:51:34', '2026-01-13 21:51:46');
+INSERT INTO `users` (`user_id`, `role_id`, `username`, `email`, `password`, `profile_picture`, `is_locked`, `created_at`, `updated_at`, `locked_at`, `locked_reason`) VALUES
+(12, 1, 'superadmin', 'superadmin@account.com', '$2b$10$T.26b735YO8l6lCRX9SyOOOan6Xr9aIoLp4IL8H3n9lN6HvktyHZO', '/uploads/avatars/avatar-1768303595520-674066993.jpg', 0, '2026-01-11 13:54:16', '2026-01-13 19:26:35', NULL, NULL),
+(14, 2, 'Instructor', 'instructor@email.com', '$2b$10$S3bj7Lmb6HcIr6qIMLap4ubr.eNJIF3RHPZkJjHb42/D.0JJxgchW', '/uploads/avatars/avatar-1768305653517-770944451.png', 0, '2026-01-13 20:00:53', '2026-01-14 08:31:46', NULL, NULL),
+(15, 3, 'Student', 'student@email.com', '$2b$10$NqkZGMZWyNEwnNB1QuhYwOWfpgf8sOGv8lILONUukSzsd4q9O/Dqm', '/uploads/avatars/avatar-1768306326842-613300419.png', 0, '2026-01-13 20:12:07', '2026-01-14 08:27:06', NULL, NULL),
+(16, 3, 'TEST2', 'student2@gmail.com', '$2b$10$9.YHY05dp7WfOrVqZ48IPuTRykGQfUy6rB6F09RI9tDNZs7yOckmG', '/uploads/avatars/avatar-1768312294530-514777482.png', 0, '2026-01-13 21:51:34', '2026-01-13 21:51:46', NULL, NULL),
+(17, 3, 'Raph Kenneth Zambrona', 'Kenneth@gmail.com', '$2b$10$AujHKGHvyIiySUH0JxTpyeZjA6iWu.e1F4RzAn9v/0W/ff6QEfE7K', '/uploads/avatars/1768396549260-1763628324887-666366028-c6ed942f62acf1a071c6aa0455f49ef3__2_.jpg', 0, '2026-01-14 17:19:33', '2026-01-14 21:15:49', NULL, NULL),
+(18, 2, 'Ivell Ibarra', 'Ibarra@gmail.com', '$2b$10$azMKDTgzMdHYydppmd.1T.takt/UxnlLFW753bJNRcnlhv38rkB6.', '/uploads/avatars/avatar-1768382764217-829375816.JPG', 0, '2026-01-14 17:22:19', '2026-01-14 20:45:38', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1063,7 +1343,12 @@ INSERT INTO `user_avatars` (`avatar_id`, `user_id`, `original_name`, `stored_nam
 (27, 15, 'Pierre, Shobe R..png', '1768312126618-Pierre__Shobe_R..png', '/uploads/avatars/1768312126618-Pierre__Shobe_R..png', 'image/png', 883476, 1, '2026-01-14 08:27:06'),
 (28, 14, 'aww-hell.gif', '1768312670235-aww-hell.gif', '/uploads/avatars/1768312670235-aww-hell.gif', 'image/gif', 435832, 0, '2026-01-13 21:57:50'),
 (29, 14, 'sticker-yung-joc-crying.gif', '1768312681047-sticker-yung-joc-crying.gif', '/uploads/avatars/1768312681047-sticker-yung-joc-crying.gif', 'image/gif', 469082, 0, '2026-01-13 21:58:01'),
-(30, 14, 'we wil lbe right.png', '1768312685420-we_wil_lbe_right.png', '/uploads/avatars/1768312685420-we_wil_lbe_right.png', 'image/png', 480684, 1, '2026-01-14 08:31:46');
+(30, 14, 'we wil lbe right.png', '1768312685420-we_wil_lbe_right.png', '/uploads/avatars/1768312685420-we_wil_lbe_right.png', 'image/png', 480684, 1, '2026-01-14 08:31:46'),
+(31, 17, 'Screenshot 2025-06-15 233159.png', '1768388631843-Screenshot_2025-06-15_233159.png', '/uploads/avatars/1768388631843-Screenshot_2025-06-15_233159.png', 'image/png', 9177, 0, '2026-01-14 20:43:45'),
+(32, 18, '338233553_537428044984358_7784323146192052167_n (1).jpg', '1768394328687-338233553_537428044984358_7784323146192052167_n__1_.jpg', '/uploads/avatars/1768394328687-338233553_537428044984358_7784323146192052167_n__1_.jpg', 'image/jpeg', 61909, 0, '2026-01-14 20:38:50'),
+(33, 18, 'DSC_0026.JPG', '1768394702487-DSC_0026.JPG', '/uploads/avatars/1768394702487-DSC_0026.JPG', 'image/jpeg', 2928471, 1, '2026-01-14 20:45:39'),
+(34, 17, 'ancient-ruins-circle-stone-platform-260nw-2167200551.jpg', '1768396022423-ancient-ruins-circle-stone-platform-260nw-2167200551.jpg', '/uploads/avatars/1768396022423-ancient-ruins-circle-stone-platform-260nw-2167200551.jpg', 'image/jpeg', 42552, 0, '2026-01-14 21:11:25'),
+(35, 17, '1763628324887-666366028-c6ed942f62acf1a071c6aa0455f49ef3 (2).jpg', '1768396549260-1763628324887-666366028-c6ed942f62acf1a071c6aa0455f49ef3__2_.jpg', '/uploads/avatars/1768396549260-1763628324887-666366028-c6ed942f62acf1a071c6aa0455f49ef3__2_.jpg', 'image/jpeg', 35276, 1, '2026-01-14 21:15:49');
 
 --
 -- Indexes for dumped tables
@@ -1115,6 +1400,16 @@ ALTER TABLE `activity_submissions`
 ALTER TABLE `activity_submission_attachments`
   ADD PRIMARY KEY (`attachment_id`),
   ADD KEY `idx_submission` (`submission_id`);
+
+--
+-- Indexes for table `admin_messages`
+--
+ALTER TABLE `admin_messages`
+  ADD PRIMARY KEY (`message_id`),
+  ADD KEY `admin_id` (`admin_id`),
+  ADD KEY `idx_user_id` (`user_id`),
+  ADD KEY `idx_is_read` (`is_read`),
+  ADD KEY `idx_created_at` (`created_at`);
 
 --
 -- Indexes for table `announcements`
@@ -1276,7 +1571,8 @@ ALTER TABLE `submissions`
 ALTER TABLE `users`
   ADD PRIMARY KEY (`user_id`),
   ADD UNIQUE KEY `email` (`email`),
-  ADD KEY `role_id` (`role_id`);
+  ADD KEY `role_id` (`role_id`),
+  ADD KEY `idx_is_locked` (`is_locked`);
 
 --
 -- Indexes for table `user_avatars`
@@ -1293,7 +1589,7 @@ ALTER TABLE `user_avatars`
 -- AUTO_INCREMENT for table `activities`
 --
 ALTER TABLE `activities`
-  MODIFY `activity_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=69;
+  MODIFY `activity_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=71;
 
 --
 -- AUTO_INCREMENT for table `activities_classwork`
@@ -1311,7 +1607,7 @@ ALTER TABLE `activity_items`
 -- AUTO_INCREMENT for table `activity_quiz_links`
 --
 ALTER TABLE `activity_quiz_links`
-  MODIFY `link_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `link_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `activity_submissions`
@@ -1326,16 +1622,22 @@ ALTER TABLE `activity_submission_attachments`
   MODIFY `attachment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
+-- AUTO_INCREMENT for table `admin_messages`
+--
+ALTER TABLE `admin_messages`
+  MODIFY `message_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
 -- AUTO_INCREMENT for table `announcements`
 --
 ALTER TABLE `announcements`
-  MODIFY `announcement_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `announcement_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `audit_logs`
 --
 ALTER TABLE `audit_logs`
-  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=384;
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=583;
 
 --
 -- AUTO_INCREMENT for table `dragdrop_attempts`
@@ -1371,13 +1673,13 @@ ALTER TABLE `permissions`
 -- AUTO_INCREMENT for table `posting_teacher`
 --
 ALTER TABLE `posting_teacher`
-  MODIFY `posting_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `posting_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `quizzes`
 --
 ALTER TABLE `quizzes`
-  MODIFY `quiz_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `quiz_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `quiz_answers`
@@ -1389,7 +1691,7 @@ ALTER TABLE `quiz_answers`
 -- AUTO_INCREMENT for table `quiz_attempts`
 --
 ALTER TABLE `quiz_attempts`
-  MODIFY `attempt_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `attempt_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `quiz_attempt_answers`
@@ -1401,13 +1703,13 @@ ALTER TABLE `quiz_attempt_answers`
 -- AUTO_INCREMENT for table `quiz_questions`
 --
 ALTER TABLE `quiz_questions`
-  MODIFY `question_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `question_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `quiz_question_choices`
 --
 ALTER TABLE `quiz_question_choices`
-  MODIFY `choice_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
+  MODIFY `choice_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
 
 --
 -- AUTO_INCREMENT for table `roles`
@@ -1431,13 +1733,13 @@ ALTER TABLE `student_scores`
 -- AUTO_INCREMENT for table `student_subjects`
 --
 ALTER TABLE `student_subjects`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `subjects`
 --
 ALTER TABLE `subjects`
-  MODIFY `subject_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `subject_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `submissions`
@@ -1449,13 +1751,13 @@ ALTER TABLE `submissions`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `user_avatars`
 --
 ALTER TABLE `user_avatars`
-  MODIFY `avatar_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `avatar_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- Constraints for dumped tables
@@ -1500,6 +1802,13 @@ ALTER TABLE `activity_submissions`
 --
 ALTER TABLE `activity_submission_attachments`
   ADD CONSTRAINT `activity_submission_attachments_ibfk_1` FOREIGN KEY (`submission_id`) REFERENCES `activity_submissions` (`submission_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `admin_messages`
+--
+ALTER TABLE `admin_messages`
+  ADD CONSTRAINT `admin_messages_ibfk_1` FOREIGN KEY (`admin_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `admin_messages_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `audit_logs`

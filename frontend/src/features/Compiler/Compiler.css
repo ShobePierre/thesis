@@ -13,6 +13,13 @@
   position: relative;
 }
 
+/* Desktop layout with fixed sidebar */
+@media (min-width: 768px) {
+  .compiler-content {
+    margin-left: 288px;
+  }
+}
+
 /* Animated Background Blobs */
 .compiler-bg-blob {
   position: fixed;

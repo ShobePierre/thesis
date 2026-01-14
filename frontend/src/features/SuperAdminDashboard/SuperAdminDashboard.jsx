@@ -169,15 +169,26 @@ function UserManagement({ onStatsUpdate }) {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showLockModal, setShowLockModal] = useState(false);
+  const [showMessageModal, setShowMessageModal] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [profilePicture, setProfilePicture] = useState(null);
   const [profilePreview, setProfilePreview] = useState(null);
   const [userToDelete, setUserToDelete] = useState(null);
+  const [userToLock, setUserToLock] = useState(null);
+  const [userToMessage, setUserToMessage] = useState(null);
+  const [lockReason, setLockReason] = useState('');
+  const [messageData, setMessageData] = useState({ title: '', content: '' });
   const [editingUser, setEditingUser] = useState(null);
   const [formData, setFormData] = useState({ username: '', email: '', password: '', role_id: 3 });
 
   useEffect(() => {
     fetchUsers();
+    // Refresh users list every 30 seconds to show updates from other sources (e.g., student profile changes)
+    const interval = setInterval(() => {
+      fetchUsers();
+    }, 30000);
+    return () => clearInterval(interval);
   }, [search, roleFilter]);
 
   const fetchUsers = async () => {
@@ -306,6 +317,85 @@ function UserManagement({ onStatsUpdate }) {
   const handleDeleteUser = (user) => {
     setUserToDelete(user);
     setShowDeleteModal(true);
+  };
+
+  const handleLockUser = (user) => {
+    setUserToLock(user);
+    setLockReason('');
+    setShowLockModal(true);
+  };
+
+  const handleMessageUser = (user) => {
+    setUserToMessage(user);
+    setMessageData({ title: '', content: '' });
+    setShowMessageModal(true);
+  };
+
+  const sendMessage = async () => {
+    if (!userToMessage || !messageData.title || !messageData.content) {
+      alert('Please fill in all fields');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/superadmin/messages', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({ 
+          user_id: userToMessage.user_id,
+          title: messageData.title,
+          content: messageData.content
+        }),
+      });
+
+      if (response.ok) {
+        alert('Message sent successfully');
+        setShowMessageModal(false);
+        setUserToMessage(null);
+        setMessageData({ title: '', content: '' });
+      } else {
+        const error = await response.json();
+        alert('Error: ' + error.message);
+      }
+    } catch (err) {
+      console.error('Error sending message:', err);
+      alert('Error sending message');
+    }
+  };
+
+  const confirmLockUser = async () => {
+    if (!userToLock) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const isLocked = !userToLock.is_locked;
+      const response = await fetch(`http://localhost:5000/api/superadmin/users/${userToLock.user_id}/lock`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({ 
+          isLocked,
+          reason: lockReason || 'Restricted by administrator'
+        }),
+      });
+
+      if (response.ok) {
+        fetchUsers();
+        if (onStatsUpdate) onStatsUpdate();
+      }
+    } catch (err) {
+      console.error('Error toggling user lock:', err);
+    } finally {
+      setShowLockModal(false);
+      setUserToLock(null);
+      setLockReason('');
+    }
   };
 
   const confirmDelete = async () => {
@@ -701,6 +791,146 @@ function UserManagement({ onStatsUpdate }) {
         </div>
       )}
 
+      {/* Lock User Modal */}
+      {showLockModal && userToLock && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl transform transition-all animate-slideUp">
+            <div className="flex items-center gap-3 mb-6">
+              <div className={`p-3 rounded-xl ${userToLock.is_locked ? 'bg-green-100' : 'bg-orange-100'}`}>
+                <svg className={`w-6 h-6 ${userToLock.is_locked ? 'text-green-600' : 'text-orange-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                {userToLock.is_locked ? 'Unlock Account' : 'Restrict Account'}
+              </h2>
+            </div>
+            
+            <div className="space-y-4">
+              <p className="text-gray-700">
+                Are you sure you want to {userToLock.is_locked ? 'unlock' : 'restrict'} user <span className="font-bold text-gray-900">{userToLock.username}</span>?
+              </p>
+              
+              {!userToLock.is_locked && (
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Reason for Restriction (optional)</label>
+                  <textarea
+                    value={lockReason}
+                    onChange={(e) => setLockReason(e.target.value)}
+                    placeholder="e.g., Violation of terms of service, Academic dishonesty, etc."
+                    className="w-full px-4 py-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+                    rows="3"
+                  />
+                </div>
+              )}
+              
+              <div className={`border rounded-xl p-4 ${userToLock.is_locked ? 'bg-green-50 border-green-200' : 'bg-orange-50 border-orange-200'}`}>
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0">
+                    <svg className={`w-5 h-5 ${userToLock.is_locked ? 'text-green-600' : 'text-orange-600'}`} fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className={`text-sm font-semibold ${userToLock.is_locked ? 'text-green-800' : 'text-orange-800'}`}>
+                      {userToLock.is_locked 
+                        ? 'Account will be unlocked and user can log in again'
+                        : 'User will not be able to log in until account is unlocked'
+                      }
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={confirmLockUser}
+                className={`flex-1 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all ${
+                  userToLock.is_locked
+                    ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800'
+                    : 'bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800'
+                }`}
+              >
+                {userToLock.is_locked ? 'Yes, Unlock Account' : 'Yes, Restrict Account'}
+              </button>
+              <button
+                onClick={() => {
+                  setShowLockModal(false);
+                  setUserToLock(null);
+                  setLockReason('');
+                }}
+                className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-xl hover:bg-gray-300 font-semibold transition"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Message User Modal */}
+      {showMessageModal && userToMessage && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl transform transition-all animate-slideUp">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="bg-purple-100 p-3 rounded-xl">
+                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Send Message</h2>
+                <p className="text-sm text-gray-600 mt-1">To: {userToMessage.username}</p>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Message Title</label>
+                <input
+                  type="text"
+                  placeholder="Enter message title"
+                  value={messageData.title}
+                  onChange={(e) => setMessageData({ ...messageData, title: e.target.value })}
+                  className="w-full px-4 py-3 bg-gray-50 text-gray-900 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Message Content</label>
+                <textarea
+                  placeholder="Enter your message..."
+                  value={messageData.content}
+                  onChange={(e) => setMessageData({ ...messageData, content: e.target.value })}
+                  rows="6"
+                  className="w-full px-4 py-3 bg-gray-50 text-gray-900 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition resize-none"
+                />
+              </div>
+              
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={sendMessage}
+                  className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 text-white py-3 rounded-xl hover:from-purple-700 hover:to-purple-800 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+                >
+                  Send Message
+                </button>
+                <button
+                  onClick={() => {
+                    setShowMessageModal(false);
+                    setUserToMessage(null);
+                    setMessageData({ title: '', content: '' });
+                  }}
+                  className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-xl hover:bg-gray-300 font-semibold transition"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Users Table with Enhanced Design */}
       <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200">
         <div className="overflow-x-auto">
@@ -777,12 +1007,28 @@ function UserManagement({ onStatsUpdate }) {
                       })}
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 flex-wrap">
                         <button
                           onClick={() => handleEditUser(user)}
                           className="text-blue-600 hover:text-white hover:bg-blue-600 font-semibold text-sm px-4 py-2 rounded-lg transition-all duration-200 border border-blue-600"
                         >
                           Edit
+                        </button>
+                        <button
+                          onClick={() => handleMessageUser(user)}
+                          className="text-purple-600 hover:text-white hover:bg-purple-600 font-semibold text-sm px-4 py-2 rounded-lg transition-all duration-200 border border-purple-600"
+                        >
+                          Message
+                        </button>
+                        <button
+                          onClick={() => handleLockUser(user)}
+                          className={`font-semibold text-sm px-4 py-2 rounded-lg transition-all duration-200 border ${
+                            user.is_locked 
+                              ? 'text-green-600 hover:text-white hover:bg-green-600 border-green-600' 
+                              : 'text-orange-600 hover:text-white hover:bg-orange-600 border-orange-600'
+                          }`}
+                        >
+                          {user.is_locked ? 'Unlock' : 'Restrict'}
                         </button>
                         <button
                           onClick={() => handleDeleteUser(user)}

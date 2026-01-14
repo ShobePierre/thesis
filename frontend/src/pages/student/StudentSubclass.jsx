@@ -621,12 +621,12 @@ function StudentSubclass() {
 
   return (
     // Increase base font size and make fonts bolder across the Student class UI
-    <div className="flex min-h-screen bg-gradient-to-br from-[#cfe3fa] via-[#e6f0ff] to-white text-lg font-semibold">
+    <div className="flex min-h-screen bg-gradient-to-br from-[#cfe3fa] via-[#e6f0ff] to-white text-lg font-semibold md:ml-72">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="flex-1 flex flex-col">
         <Header onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} onLogout={handleLogout} />
 
-        <main className="flex-1 px-6 sm:px-10 py-10 mt-12 space-y-10 md:ml-24">
+        <main className="flex-1 px-6 sm:px-10 py-10 mt-12 space-y-10 w-full">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div>
               <button onClick={() => navigate("/student/StudentDashboard")} className="text-base font-bold text-blue-600 rounded-full border border-blue p-2 hover:text-blue-700">

@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const superAdminController = require('../controllers/superadmin.controller');
+const messageController = require('../controllers/message.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
 
 // Configure multer for profile picture uploads
@@ -42,9 +43,13 @@ router.get('/users/:userId', authMiddleware.logAudit('user', 'view_user'), super
 router.post('/users', upload.single('profile_picture'), authMiddleware.logAudit('user', 'create_user'), superAdminController.createUser);
 router.put('/users/:userId', upload.single('profile_picture'), authMiddleware.logAudit('user', 'update_user'), superAdminController.updateUser);
 router.delete('/users/:userId', authMiddleware.logAudit('user', 'delete_user'), superAdminController.deleteUser);
+router.put('/users/:userId/lock', authMiddleware.logAudit('user', 'toggle_user_lock'), superAdminController.toggleUserLock);
 
 // ==================== SUBMISSIONS MANAGEMENT ====================
 router.get('/submissions', authMiddleware.logAudit('submission', 'view_submissions'), superAdminController.getAllSubmissions);
+
+// ==================== ADMIN MESSAGES ====================
+router.post('/messages', authMiddleware.logAudit('message', 'send_message'), messageController.sendMessage);
 
 // ==================== DATA EXPORT ====================
 router.get('/export', authMiddleware.logAudit('export', 'export_data'), superAdminController.exportData);

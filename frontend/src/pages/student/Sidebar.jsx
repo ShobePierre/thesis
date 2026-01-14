@@ -143,8 +143,11 @@ function Sidebar({ isOpen, onClose }) {
         className={`${
           isOpen
             ? "fixed top-0 left-0 z-50 w-72 h-screen bg-white border-r-2 border-gray-200 shadow-lg"
-            : "hidden md:flex md:sticky md:top-16 md:h-[calc(100vh-4rem)] md:w-72 md:flex-col bg-white border-r-2 border-gray-200 shadow-lg"
-        } transform ${isOpen ? 'translate-x-0' : ''} transition-transform duration-300 ease-in-out z-50`}
+            : "hidden md:flex md:fixed md:left-0 md:top-16 md:h-[calc(100vh-4rem)] md:w-72 md:flex-col md:flex-shrink-0 bg-white border-r-2 border-gray-200 shadow-lg"
+        } transform ${isOpen ? 'translate-x-0' : ''} transition-transform duration-300 ease-in-out`}
+        style={{
+          zIndex: isOpen ? 9999 : 40,
+        }}
       >
           {/* Header: match dashboard (avatar, name, email) */}
           <div className="px-4 py-6 text-center border-b">

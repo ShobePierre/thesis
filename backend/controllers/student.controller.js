@@ -240,18 +240,24 @@ exports.updateSetting = (req, res) => {
           console.error('Failed to insert avatar record:', iErr);
           return res.status(500).json({ message: 'Failed to save avatar' });
         }
-        // If a username was submitted with the multipart form, update users.username as well
-        const bodyUsername = req.body && req.body.username ? String(req.body.username).trim() : null;
-        if (bodyUsername) {
-          const updateUserSql = 'UPDATE users SET username = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?';
-          db.query(updateUserSql, [bodyUsername, userId], (uErr) => {
-            if (uErr) console.error('Failed to update username after avatar upload:', uErr);
-            return res.json({ message: 'Avatar uploaded', avatar: { file_path: filePath, stored_name: filename }, username: bodyUsername });
-          });
-          return;
-        }
+        // Update the users.profile_picture field with the new avatar path
+        const updateProfilePicSql = 'UPDATE users SET profile_picture = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?';
+        db.query(updateProfilePicSql, [filePath, userId], (ppErr) => {
+          if (ppErr) console.error('Failed to update profile_picture:', ppErr);
+          
+          // If a username was submitted with the multipart form, update users.username as well
+          const bodyUsername = req.body && req.body.username ? String(req.body.username).trim() : null;
+          if (bodyUsername) {
+            const updateUserSql = 'UPDATE users SET username = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?';
+            db.query(updateUserSql, [bodyUsername, userId], (uErr) => {
+              if (uErr) console.error('Failed to update username after avatar upload:', uErr);
+              return res.json({ message: 'Avatar uploaded', avatar: { file_path: filePath, stored_name: filename }, username: bodyUsername });
+            });
+            return;
+          }
 
-        return res.json({ message: 'Avatar uploaded', avatar: { file_path: filePath, stored_name: filename } });
+          return res.json({ message: 'Avatar uploaded', avatar: { file_path: filePath, stored_name: filename } });
+        });
       });
     });
     return;
@@ -288,20 +294,26 @@ exports.updateSetting = (req, res) => {
               console.error('Failed to mark avatar current', sErr);
               return res.status(500).json({ message: 'Failed to set avatar' });
             }
-            // If a username was provided along with avatar_path, update it on the users table
-            const bodyUsername = req.body && req.body.username ? String(req.body.username).trim() : null;
-            if (bodyUsername) {
-              const updateUserSql = 'UPDATE users SET username = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?';
-              db.query(updateUserSql, [bodyUsername, userId], (uErr) => {
-                if (uErr) {
-                  console.error('Failed to update username when setting avatar by path:', uErr);
-                }
-                return res.json({ message: 'Avatar updated', avatar: { file_path: pathValue }, username: bodyUsername });
-              });
-              return;
-            }
+            // Update the users.profile_picture field with the new avatar path
+            const updateProfilePicSql = 'UPDATE users SET profile_picture = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?';
+            db.query(updateProfilePicSql, [pathValue, userId], (ppErr) => {
+              if (ppErr) console.error('Failed to update profile_picture:', ppErr);
+              
+              // If a username was provided along with avatar_path, update it on the users table
+              const bodyUsername = req.body && req.body.username ? String(req.body.username).trim() : null;
+              if (bodyUsername) {
+                const updateUserSql = 'UPDATE users SET username = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?';
+                db.query(updateUserSql, [bodyUsername, userId], (uErr) => {
+                  if (uErr) {
+                    console.error('Failed to update username when setting avatar by path:', uErr);
+                  }
+                  return res.json({ message: 'Avatar updated', avatar: { file_path: pathValue }, username: bodyUsername });
+                });
+                return;
+              }
 
-            return res.json({ message: 'Avatar updated', avatar: { file_path: pathValue } });
+              return res.json({ message: 'Avatar updated', avatar: { file_path: pathValue } });
+            });
           });
           return;
         }
@@ -315,18 +327,24 @@ exports.updateSetting = (req, res) => {
             console.error('Failed to insert avatar record for path', iErr);
             return res.status(500).json({ message: 'Failed to save avatar' });
           }
-          // update username if provided
-          const bodyUsername = req.body && req.body.username ? String(req.body.username).trim() : null;
-          if (bodyUsername) {
-            const updateUserSql = 'UPDATE users SET username = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?';
-            db.query(updateUserSql, [bodyUsername, userId], (uErr) => {
-              if (uErr) console.error('Failed to update username when inserting avatar path:', uErr);
-              return res.json({ message: 'Avatar updated', avatar: { file_path: pathValue }, username: bodyUsername });
-            });
-            return;
-          }
+          // Update the users.profile_picture field with the new avatar path
+          const updateProfilePicSql = 'UPDATE users SET profile_picture = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?';
+          db.query(updateProfilePicSql, [pathValue, userId], (ppErr) => {
+            if (ppErr) console.error('Failed to update profile_picture:', ppErr);
+            
+            // update username if provided
+            const bodyUsername = req.body && req.body.username ? String(req.body.username).trim() : null;
+            if (bodyUsername) {
+              const updateUserSql = 'UPDATE users SET username = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?';
+              db.query(updateUserSql, [bodyUsername, userId], (uErr) => {
+                if (uErr) console.error('Failed to update username when inserting avatar path:', uErr);
+                return res.json({ message: 'Avatar updated', avatar: { file_path: pathValue }, username: bodyUsername });
+              });
+              return;
+            }
 
-          return res.json({ message: 'Avatar updated', avatar: { file_path: pathValue } });
+            return res.json({ message: 'Avatar updated', avatar: { file_path: pathValue } });
+          });
         });
       });
     });

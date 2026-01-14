@@ -4,11 +4,14 @@ import axios from "axios";
 
 import Header from "../../web_components/Header";
 import Sidebar from "./Sidebar";
+const API_BASE_URL = "http://localhost:5000/api";
 
 function Setting() {
   const [message, setMessage] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
+  const [messages, setMessages] = useState([]);
+  const [loadingMessages, setLoadingMessages] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -65,6 +68,53 @@ function Setting() {
 
   // Active tab/section
   const [active, setActive] = useState('profile');
+
+  // Fetch messages when messages tab is active
+  useEffect(() => {
+    if (active === 'messages') {
+      fetchMessages();
+    }
+  }, [active]);
+
+  const fetchMessages = async () => {
+    setLoadingMessages(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API_BASE_URL}/user/messages`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setMessages(response.data.messages || []);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      setMessages([]);
+    } finally {
+      setLoadingMessages(false);
+    }
+  };
+
+  const markMessageAsRead = async (messageId) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.put(`${API_BASE_URL}/user/messages/${messageId}/read`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setMessages(messages.map(msg => msg.message_id === messageId ? { ...msg, is_read: 1 } : msg));
+    } catch (error) {
+      console.error('Error marking message as read:', error);
+    }
+  };
+
+  const deleteMessage = async (messageId) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${API_BASE_URL}/user/messages/${messageId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setMessages(messages.filter(msg => msg.message_id !== messageId));
+    } catch (error) {
+      console.error('Error deleting message:', error);
+    }
+  };
 
   // Per-section local state (persisted to localStorage). Defaults are sensible so page is usable right away.
   const [profileSettings, setProfileSettings] = useState(() => {
@@ -189,6 +239,11 @@ function Setting() {
                 <div className="text-xs text-gray-500 mt-1">Name, bio, avatar</div>
               </button>
 
+              <button onClick={() => setActive('messages')} className={`w-full text-left p-3 rounded-lg transition ${active === 'messages' ? 'bg-gradient-to-r from-purple-50 to-purple-100 ring-1 ring-purple-200' : 'hover:bg-gray-50'}`}>
+                <div className="text-sm font-semibold text-gray-900">Messages</div>
+                <div className="text-xs text-gray-500 mt-1">Admin messages</div>
+              </button>
+
               {/* Class defaults removed — nav kept minimal */}
 
               {/* Notifications tab removed — kept profile only */}
@@ -208,6 +263,10 @@ function Setting() {
               <div className="mt-6">
                 {active === 'profile' && (
                   <ProfileForm value={profileSettings} onChange={setProfileSettings} />
+                )}
+
+                {active === 'messages' && (
+                  <InstructorMessagesTab messages={messages} loading={loadingMessages} onMarkAsRead={markMessageAsRead} onDelete={deleteMessage} />
                 )}
 
                 {/* class defaults removed */}
@@ -314,5 +373,60 @@ function ProfileForm({ value, onChange }) {
 // class defaults removed - UI no longer includes ClassForm
 
 // Notifications removed for instructors — handled elsewhere if needed
+
+function InstructorMessagesTab({ messages, loading, onMarkAsRead, onDelete }) {
+  const [expandedId, setExpandedId] = useState(null);
+
+  return (
+    <div className="space-y-4">
+      {loading ? (
+        <p className="text-center text-gray-500">Loading messages...</p>
+      ) : messages.length === 0 ? (
+        <p className="text-center text-gray-500">No messages yet</p>
+      ) : (
+        messages.map((msg) => (
+          <div
+            key={msg.message_id}
+            className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition"
+          >
+            <div
+              onClick={() => {
+                setExpandedId(expandedId === msg.message_id ? null : msg.message_id);
+                if (!msg.is_read) {
+                  onMarkAsRead(msg.message_id);
+                }
+              }}
+              className="cursor-pointer flex justify-between items-start"
+            >
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-800">{msg.title}</h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  {new Date(msg.created_at).toLocaleDateString()} {new Date(msg.created_at).toLocaleTimeString()}
+                </p>
+              </div>
+              {!msg.is_read && (
+                <span className="ml-4 inline-block w-2 h-2 bg-blue-500 rounded-full"></span>
+              )}
+            </div>
+
+            {expandedId === msg.message_id && (
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <p className="text-gray-700">{msg.content}</p>
+                <div className="mt-4 flex gap-2">
+                  <button
+                    onClick={() => onDelete(msg.message_id)}
+                    className="px-3 py-1 text-sm bg-red-50 text-red-600 hover:bg-red-100 rounded transition"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ))
+      )}
+    </div>
+  );
+}
 
 export default Setting;
