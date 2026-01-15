@@ -126,13 +126,19 @@ exports.updateUser = (req, res) => {
 
   console.log('Update user request:', { userId, username, email, role_id, hasPassword: !!password, hasFile: !!req.file });
 
-  if (!username || !email || !role_id) {
-    return res.status(400).send({ message: 'All fields are required' });
+  // Username and email are required; role changes are optional and handled only if provided
+  if (!username || !email) {
+    return res.status(400).send({ message: 'Username and email are required' });
   }
 
-  // Build dynamic update query
-  let updateFields = ['username = ?', 'email = ?', 'role_id = ?'];
-  let updateValues = [username, email, parseInt(role_id)];
+  // Build dynamic update query (do not overwrite role_id unless explicitly provided)
+  let updateFields = ['username = ?', 'email = ?'];
+  let updateValues = [username, email];
+
+  if (typeof role_id !== 'undefined' && role_id !== null && role_id !== '') {
+    updateFields.push('role_id = ?');
+    updateValues.push(parseInt(role_id));
+  }
 
   // Add profile picture if provided
   if (profilePicture) {
@@ -140,45 +146,57 @@ exports.updateUser = (req, res) => {
     updateValues.push(profilePicture);
   }
 
-  const performUpdate = (additionalFields = [], additionalValues = []) => {
-    const allFields = [...updateFields, ...additionalFields];
-    const allValues = [...updateValues, ...additionalValues, userId];
-    
-    const updateQuery = `UPDATE users SET ${allFields.join(', ')} WHERE user_id = ?`;
-    console.log('Executing query:', updateQuery);
-    console.log('With values:', allValues);
-    
-    db.query(updateQuery, allValues, (err, results) => {
-      if (err) {
-        console.error('Update user error:', err);
-        return res.status(500).send({ message: 'Error updating user', error: err.message });
-      }
+  // Ensure username or email are not taken by another account
+  db.query('SELECT user_id FROM users WHERE (email = ? OR username = ?) AND user_id != ?', [email, username, userId], (checkErr, checkResults) => {
+    if (checkErr) {
+      console.error('Uniqueness check error:', checkErr);
+      return res.status(500).send({ message: 'Error updating user', error: checkErr.message });
+    }
 
-      if (results.affectedRows === 0) {
-        return res.status(404).send({ message: 'User not found' });
-      }
+    if (checkResults.length > 0) {
+      return res.status(409).send({ message: 'Username or email already in use by another account' });
+    }
 
-      // Update audit data entity_id
-      if (req.auditData) {
-        req.auditData.entity_id = parseInt(userId);
-      }
+    const performUpdate = (additionalFields = [], additionalValues = []) => {
+      const allFields = [...updateFields, ...additionalFields];
+      const allValues = [...updateValues, ...additionalValues, userId];
+      
+      const updateQuery = `UPDATE users SET ${allFields.join(', ')} WHERE user_id = ?`;
+      console.log('Executing query:', updateQuery);
+      console.log('With values:', allValues);
+      
+      db.query(updateQuery, allValues, (err, results) => {
+        if (err) {
+          console.error('Update user error:', err);
+          return res.status(500).send({ message: 'Error updating user', error: err.message });
+        }
 
-      res.send({ message: 'User updated successfully' });
-    });
-  };
+        if (results.affectedRows === 0) {
+          return res.status(404).send({ message: 'User not found' });
+        }
 
-  // Add password if provided
-  if (password && password.trim() !== '') {
-    bcrypt.hash(password, 10, (hashErr, hash) => {
-      if (hashErr) {
-        console.error('Password hash error:', hashErr);
-        return res.status(500).send({ message: 'Error hashing password' });
-      }
-      performUpdate(['password = ?'], [hash]);
-    });
-  } else {
-    performUpdate();
-  }
+        // Update audit data entity_id
+        if (req.auditData) {
+          req.auditData.entity_id = parseInt(userId);
+        }
+
+        res.send({ message: 'User updated successfully' });
+      });
+    };
+
+    // Add password if provided
+    if (password && password.trim() !== '') {
+      bcrypt.hash(password, 10, (hashErr, hash) => {
+        if (hashErr) {
+          console.error('Password hash error:', hashErr);
+          return res.status(500).send({ message: 'Error hashing password' });
+        }
+        performUpdate(['password = ?'], [hash]);
+      });
+    } else {
+      performUpdate();
+    }
+  });
 };
 
 exports.deleteUser = (req, res) => {

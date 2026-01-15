@@ -82,6 +82,7 @@ function AnnouncementComposer({
         content: createdAnnouncement.content,
         created_at: createdAnnouncement.created_at || new Date().toISOString(),
         instructor_name: createdAnnouncement.instructor_name || instructorName,
+        instructor_id: createdAnnouncement.instructor_id,
         attachments: createdAnnouncement.attachments || [],
       };
 

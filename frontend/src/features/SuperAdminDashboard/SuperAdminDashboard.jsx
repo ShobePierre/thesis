@@ -280,8 +280,8 @@ function UserManagement({ onStatsUpdate }) {
       const formDataToSend = new FormData();
       formDataToSend.append('username', formData.username);
       formDataToSend.append('email', formData.email);
-      formDataToSend.append('role_id', formData.role_id);
       
+      // Role is not editable via this form to prevent privilege changes
       // Only include password if it's not empty
       if (formData.password) {
         formDataToSend.append('password', formData.password);
@@ -585,6 +585,8 @@ function UserManagement({ onStatsUpdate }) {
                     setShowPassword(false);
                     setProfilePicture(null);
                     setProfilePreview(null);
+                    setSearch('');
+                    setRoleFilter('');
                   }}
                   className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-xl hover:bg-gray-300 font-semibold transition"
                 >
@@ -693,15 +695,9 @@ function UserManagement({ onStatsUpdate }) {
               
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Role</label>
-                <select
-                  value={formData.role_id}
-                  onChange={(e) => setFormData({ ...formData, role_id: parseInt(e.target.value) })}
-                  className="w-full px-4 py-3 bg-gray-50 text-gray-900 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 font-medium"
-                >
-                  <option value={1}>Super Admin</option>
-                  <option value={2}>Admin (Instructor)</option>
-                  <option value={3}>Student</option>
-                </select>
+                <div className="w-full px-4 py-3 bg-gray-50 text-gray-700 border border-gray-300 rounded-xl">
+                  {editingUser?.role_name || (formData.role_id === 1 ? 'Super Admin' : formData.role_id === 2 ? 'Admin (Instructor)' : 'Student')}
+                </div>
               </div>
               
               <div className="flex gap-3 mt-6">
@@ -719,6 +715,8 @@ function UserManagement({ onStatsUpdate }) {
                     setShowPassword(false);
                     setProfilePicture(null);
                     setProfilePreview(null);
+                    setSearch('');
+                    setRoleFilter('');
                   }}
                   className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-xl hover:bg-gray-300 font-semibold transition"
                 >
@@ -780,6 +778,8 @@ function UserManagement({ onStatsUpdate }) {
                   onClick={() => {
                     setShowDeleteModal(false);
                     setUserToDelete(null);
+                    setSearch('');
+                    setRoleFilter('');
                   }}
                   className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-xl hover:bg-gray-300 font-semibold transition"
                 >
@@ -859,6 +859,8 @@ function UserManagement({ onStatsUpdate }) {
                   setShowLockModal(false);
                   setUserToLock(null);
                   setLockReason('');
+                  setSearch('');
+                  setRoleFilter('');
                 }}
                 className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-xl hover:bg-gray-300 font-semibold transition"
               >
@@ -920,6 +922,8 @@ function UserManagement({ onStatsUpdate }) {
                     setShowMessageModal(false);
                     setUserToMessage(null);
                     setMessageData({ title: '', content: '' });
+                    setSearch('');
+                    setRoleFilter('');
                   }}
                   className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-xl hover:bg-gray-300 font-semibold transition"
                 >
@@ -1012,7 +1016,7 @@ function UserManagement({ onStatsUpdate }) {
                           onClick={() => handleEditUser(user)}
                           className="text-blue-600 hover:text-white hover:bg-blue-600 font-semibold text-sm px-4 py-2 rounded-lg transition-all duration-200 border border-blue-600"
                         >
-                          Edit
+                          Manage
                         </button>
                         <button
                           onClick={() => handleMessageUser(user)}
